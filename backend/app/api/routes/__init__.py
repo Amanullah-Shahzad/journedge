@@ -1,0 +1,33 @@
+from app.api.routes import (
+    accounts,
+    admin,
+    analytics,
+    auth,
+    calendar,
+    compat,
+    exports,
+    health,
+    imports,
+    journal,
+    screenshots,
+    tags,
+    trades,
+    users,
+)
+
+__all__ = [
+    "accounts",
+    "admin",
+    "analytics",
+    "auth",
+    "calendar",
+    "compat",
+    "exports",
+    "health",
+    "imports",
+    "journal",
+    "screenshots",
+    "tags",
+    "trades",
+    "users",
+]
