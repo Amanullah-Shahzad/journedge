@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
     frontend_origin: str = "http://localhost:3000"
     frontend_origins: str | None = Field(None, alias="FRONTEND_ORIGINS")
+    cors_origins: str | None = Field(None, alias="CORS_ORIGINS")
+    backend_cors_origins: str | None = Field(None, alias="BACKEND_CORS_ORIGINS")
 
     database_url: str = Field(..., alias="DATABASE_URL")
     redis_url: str = Field("redis://localhost:6379/0", alias="REDIS_URL")
@@ -69,9 +71,34 @@ def get_settings() -> Settings:
 
 def get_cors_origins() -> list[str]:
     settings = get_settings()
-    if settings.frontend_origins:
-        return [origin.strip() for origin in settings.frontend_origins.split(",") if origin.strip()]
-    return [settings.frontend_origin]
+    origins: list[str] = []
+
+    for raw in (
+        settings.frontend_origins,
+        settings.cors_origins,
+        settings.backend_cors_origins,
+    ):
+        if raw:
+            origins.extend(origin.strip() for origin in raw.split(",") if origin.strip())
+
+    if not origins and settings.frontend_origin:
+        origins.append(settings.frontend_origin.strip())
+
+    origins.extend(
+        [
+            "http://localhost:3000",
+            "http://localhost:3001",
+        ]
+    )
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for origin in origins:
+        normalized = origin.rstrip("/")
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            deduped.append(normalized)
+    return deduped
 
 
 def get_allowed_upload_mime_types(raw: str | None = None) -> set[str]:
