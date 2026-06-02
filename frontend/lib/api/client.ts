@@ -1,3 +1,5 @@
+import { getAccessToken } from "./session";
+
 export class ApiError extends Error {
   status: number;
   data: unknown;
@@ -52,12 +54,17 @@ async function parseError(response: Response) {
 export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Promise<T> {
   const headers = new Headers(init?.headers);
   let body = init?.body as BodyInit | undefined;
+  const accessToken = getAccessToken();
 
   if (init?.body !== undefined && !isBodyInit(init.body)) {
     if (!headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }
     body = JSON.stringify(init.body);
+  }
+
+  if (accessToken && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
   const response = await fetch(resolveApiUrl(path), {

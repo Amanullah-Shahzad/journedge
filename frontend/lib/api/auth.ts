@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPatch, apiPost, apiPut } from "./client";
 import { invalidateWorkspaceQueries } from "./cache";
 import { queryKeys } from "./queryKeys";
+import { clearAccessToken, setAccessToken } from "./session";
 import type { AuthResponse, AuthUser, ProfileResponse } from "./types";
 
 interface LoginInput {
@@ -99,6 +100,7 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: login,
     onSuccess: async (response) => {
+      setAccessToken(response.access_token);
       queryClient.setQueryData(queryKeys.auth.me(), response.user);
       queryClient.setQueryData(queryKeys.users.me(), { user: response.user });
       await invalidateWorkspaceQueries(queryClient);
@@ -111,6 +113,7 @@ export function useRegisterMutation() {
   return useMutation({
     mutationFn: register,
     onSuccess: async (response) => {
+      setAccessToken(response.access_token);
       queryClient.setQueryData(queryKeys.auth.me(), response.user);
       queryClient.setQueryData(queryKeys.users.me(), { user: response.user });
       await invalidateWorkspaceQueries(queryClient);
@@ -123,6 +126,7 @@ export function useLogoutMutation() {
   return useMutation({
     mutationFn: logout,
     onSettled: () => {
+      clearAccessToken();
       queryClient.clear();
     },
   });

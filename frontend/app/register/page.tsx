@@ -48,7 +48,8 @@ export default function RegisterPage() {
           setError("");
           try {
             await registerMutation.mutateAsync({ email, password, full_name: fullName || undefined });
-            router.push("/");
+            router.replace("/");
+            router.refresh();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Registration failed");
           }

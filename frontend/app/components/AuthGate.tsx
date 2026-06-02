@@ -4,17 +4,23 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { useCurrentUserQuery } from "@/lib/api/auth";
+import { hasAccessToken } from "@/lib/api/session";
 
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { data, isLoading, isError } = useCurrentUserQuery();
+  const tokenPresent = hasAccessToken();
+  const { data, isLoading, isError } = useCurrentUserQuery(tokenPresent);
 
   useEffect(() => {
-    if (isError) {
+    if (!tokenPresent || isError) {
       router.replace("/login");
     }
-  }, [isError, router]);
+  }, [isError, router, tokenPresent]);
+
+  if (!tokenPresent) {
+    return null;
+  }
 
   if (isLoading) {
     return (

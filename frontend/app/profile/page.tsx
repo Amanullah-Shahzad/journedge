@@ -118,9 +118,6 @@ export default function ProfilePage() {
     } catch {
       // Redirect anyway to drop client state.
     }
-    try {
-      sessionStorage.clear();
-    } catch {}
     router.replace("/login");
     router.refresh();
   }

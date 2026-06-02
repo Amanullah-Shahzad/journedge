@@ -47,7 +47,8 @@ export default function LoginPage() {
           setError("");
           try {
             await loginMutation.mutateAsync({ email, password });
-            router.push("/");
+            router.replace("/");
+            router.refresh();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Login failed");
           }

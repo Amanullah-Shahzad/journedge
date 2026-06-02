@@ -1,11 +1,13 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { ACCESS_TOKEN_KEY } from "@/lib/api/session";
+
 const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/verify-email"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasSession = Boolean(request.cookies.get("journedge_session")?.value);
+  const hasSession = Boolean(request.cookies.get(ACCESS_TOKEN_KEY)?.value);
   const isPublic = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
 
   if (!hasSession && !isPublic && !pathname.startsWith("/_next") && !pathname.startsWith("/api")) {

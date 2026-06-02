@@ -37,11 +37,8 @@ export default function Sidebar({ onAddTrade }: SidebarProps) {
     try {
       await logoutMutation.mutateAsync();
     } catch {
-      // Best-effort logout: still clear client state via full navigation.
+      // Best-effort logout: still navigate away after local session cleanup.
     }
-    try {
-      sessionStorage.clear();
-    } catch {}
     router.replace("/login");
     router.refresh();
   }
