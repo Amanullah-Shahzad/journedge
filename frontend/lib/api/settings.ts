@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { LatestReleaseResponse, UserSettings, UserSettingsResponse } from "./types";
 import { queryKeys } from "./queryKeys";
-import { apiGet, apiPost, apiPut } from "./client";
+import { apiGet, apiPost, apiPut, resolveApiUrl } from "./client";
 
 const GITHUB_REPO = "TheQuantum-Dev/journedge";
 
@@ -17,7 +17,7 @@ export async function getLatestRelease() {
 }
 
 export function createUpdateEventSource() {
-  return new EventSource("/api/update");
+  return new EventSource(resolveApiUrl("/api/update"), { withCredentials: true });
 }
 
 export function restartManagedUpdate() {

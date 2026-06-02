@@ -16,6 +16,8 @@ interface ApiRequestOptions extends Omit<RequestInit, "body"> {
   body?: ApiRequestBody;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
+
 function isBodyInit(value: ApiRequestBody): value is BodyInit {
   return (
     value instanceof FormData ||
@@ -25,6 +27,18 @@ function isBodyInit(value: ApiRequestBody): value is BodyInit {
     ArrayBuffer.isView(value) ||
     typeof value === "string"
   );
+}
+
+export function resolveApiUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  if (typeof window !== "undefined" && API_BASE_URL && path.startsWith("/api")) {
+    return `${API_BASE_URL}${path}`;
+  }
+
+  return path;
 }
 
 async function parseError(response: Response) {
@@ -46,7 +60,7 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
     body = JSON.stringify(init.body);
   }
 
-  const response = await fetch(path, {
+  const response = await fetch(resolveApiUrl(path), {
     ...init,
     body,
     credentials: "include",
