@@ -4,16 +4,50 @@ function isBrowser() {
   return typeof window !== "undefined";
 }
 
+function readTokenCookie(): string | null {
+  if (!isBrowser()) {
+    return null;
+  }
+
+  const prefix = `${ACCESS_TOKEN_KEY}=`;
+  const entry = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(prefix));
+
+  if (!entry) {
+    return null;
+  }
+
+  try {
+    return decodeURIComponent(entry.slice(prefix.length));
+  } catch {
+    return entry.slice(prefix.length);
+  }
+}
+
 export function getAccessToken(): string | null {
   if (!isBrowser()) {
     return null;
   }
 
   try {
-    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
+    const stored = sessionStorage.getItem(ACCESS_TOKEN_KEY);
+    if (stored) {
+      return stored;
+    }
   } catch {
-    return null;
+    // fall through to cookie lookup
   }
+
+  const cookieToken = readTokenCookie();
+  if (cookieToken) {
+    try {
+      sessionStorage.setItem(ACCESS_TOKEN_KEY, cookieToken);
+    } catch {}
+  }
+
+  return cookieToken;
 }
 
 export function hasAccessToken(): boolean {
