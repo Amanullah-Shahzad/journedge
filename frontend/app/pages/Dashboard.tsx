@@ -572,6 +572,7 @@ export default function Dashboard({
     () => Math.max(...(dashboardData?.topSymbols.map((row) => Math.abs(row.pnl)) ?? [1])),
     [dashboardData],
   );
+  const pnlChartNegative = (dashboardData?.cumulativePnl ?? 0) < 0;
 
   if (trades.length === 0) {
     return <EmptyDashboard onAddTrade={onAddTrade} onImport={() => setActivePage("import")} />;
@@ -797,39 +798,20 @@ export default function Dashboard({
             </div>
           }
         >
-          <div style={{ display: "grid", gridTemplateColumns: summaryGrid, gap: "12px", marginBottom: "16px", minWidth: 0 }}>
-            <div className="surface-subtle" style={{ borderRadius: "14px", padding: "12px 14px", minWidth: 0 }}>
-              <div className="type-kpi-label" style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", fontSize: "11px", fontWeight: 600 }}>
-                Cumulative P&L
-              </div>
-              <div className="num-tabular" style={{ color: dashboardData.cumulativePnl >= 0 ? "#00e57a" : "#ff4d6a", marginTop: "8px", fontSize: "24px", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1 }}>
-                {formatCompactCurrency(dashboardData.cumulativePnl)}
-              </div>
-            </div>
-            <div className="surface-subtle" style={{ borderRadius: "14px", padding: "12px 14px", minWidth: 0 }}>
-              <div className="type-kpi-label" style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", fontSize: "11px", fontWeight: 600 }}>
-                Period P&L
-              </div>
-              <div className="num-tabular" style={{ color: dashboardData.periodPnl >= 0 ? "#00e57a" : "#ff4d6a", marginTop: "8px", fontSize: "24px", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1 }}>
-                {formatCompactCurrency(dashboardData.periodPnl)}
-              </div>
-            </div>
-          </div>
-
           <div style={{ width: "100%", minWidth: 0, minHeight: isMobile ? 260 : 320, height: isMobile ? 260 : 320 }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={dashboardData.groupedChart}>
                 <defs>
                   <linearGradient id="dashboardPnl" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00e57a" stopOpacity={0.34} />
-                    <stop offset="100%" stopColor="#00e57a" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor={pnlChartNegative ? "#ff4d6a" : "#00e57a"} stopOpacity={0.34} />
+                    <stop offset="100%" stopColor={pnlChartNegative ? "#ff4d6a" : "#00e57a"} stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: "var(--text-muted)", fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(value) => `$${value}`} />
                 <Tooltip
-                  cursor={{ stroke: "var(--accent-green)", strokeOpacity: 0.25 }}
+                  cursor={{ stroke: pnlChartNegative ? "#ff4d6a" : "var(--accent-green)", strokeOpacity: 0.25 }}
                   contentStyle={{
                     background: "var(--bg-card)",
                     border: "1px solid var(--border)",
@@ -841,9 +823,28 @@ export default function Dashboard({
                     String(name) === "cumulative" ? "Cumulative P&L" : "Period P&L",
                   ]}
                 />
-                <Area type="monotone" dataKey="cumulative" stroke="#00e57a" strokeWidth={3} fill="url(#dashboardPnl)" />
+                <Area type="monotone" dataKey="cumulative" stroke={pnlChartNegative ? "#ff4d6a" : "#00e57a"} strokeWidth={3} fill="url(#dashboardPnl)" />
               </AreaChart>
             </ResponsiveContainer>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: summaryGrid, gap: "12px", marginTop: "16px", minWidth: 0 }}>
+            <div className="surface-subtle" style={{ borderRadius: "14px", padding: "12px 14px", minWidth: 0 }}>
+              <div className="type-kpi-label" style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", fontSize: "11px", fontWeight: 600 }}>
+                Cumulative P&L
+              </div>
+              <div className="num-tabular" style={{ color: dashboardData.cumulativePnl >= 0 ? "#00e57a" : "#ff4d6a", marginTop: "8px", fontSize: "17px", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1 }}>
+                {formatCompactCurrency(dashboardData.cumulativePnl)}
+              </div>
+            </div>
+            <div className="surface-subtle" style={{ borderRadius: "14px", padding: "12px 14px", minWidth: 0 }}>
+              <div className="type-kpi-label" style={{ color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", fontSize: "11px", fontWeight: 600 }}>
+                Period P&L
+              </div>
+              <div className="num-tabular" style={{ color: dashboardData.periodPnl >= 0 ? "#00e57a" : "#ff4d6a", marginTop: "8px", fontSize: "17px", fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1 }}>
+                {formatCompactCurrency(dashboardData.periodPnl)}
+              </div>
+            </div>
           </div>
         </Section>
 
