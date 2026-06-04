@@ -128,7 +128,7 @@ export default function TagSelector({ selected, onChange, maxHeight = 240 }: Pro
             style={{
               flex: 1, background: "none", border: "none", outline: "none",
               fontSize: "13px", color: "var(--text-primary)",
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "inherit",
             }}
           />
           {input && (
@@ -163,7 +163,7 @@ export default function TagSelector({ selected, onChange, maxHeight = 240 }: Pro
                   background: "transparent", cursor: "pointer",
                   textAlign: "left", fontSize: "13px",
                   color: "var(--text-primary)",
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "inherit",
                   display: "flex", alignItems: "center", gap: "8px",
                   transition: "background 0.1s ease",
                 }}
@@ -185,7 +185,7 @@ export default function TagSelector({ selected, onChange, maxHeight = 240 }: Pro
                   background: "transparent", cursor: creating ? "default" : "pointer",
                   textAlign: "left", fontSize: "13px",
                   color: "var(--accent-green)",
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "inherit",
                   display: "flex", alignItems: "center", gap: "8px",
                   opacity: creating ? 0.6 : 1,
                 }}
@@ -217,7 +217,7 @@ export default function TagSelector({ selected, onChange, maxHeight = 240 }: Pro
                   border: "1px solid var(--border)",
                   background: "transparent",
                   color: "var(--text-muted)",
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "inherit",
                   transition: "all 0.15s ease",
                 }}
                 onMouseEnter={(e) => {

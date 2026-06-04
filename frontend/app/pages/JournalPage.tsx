@@ -7,6 +7,7 @@ import {
   TrendingUp, TrendingDown, BookOpen,
   MessageSquare, Image as ImageIcon, ExternalLink,
 } from "lucide-react";
+import { useResponsive } from "../hooks/useResponsive";
 
 interface DayGroup {
   date: string;
@@ -190,7 +191,7 @@ function TradeCard({
               flex: 1, padding: "7px 12px", borderRadius: "7px",
               border: "1px solid var(--border)", background: "transparent",
               color: "var(--text-muted)", fontSize: "11px", fontWeight: "600",
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              cursor: "pointer", fontFamily: "inherit",
               transition: "all 0.15s ease",
             }}
             onMouseEnter={(e) => {
@@ -211,7 +212,7 @@ function TradeCard({
               border: "1px solid var(--accent-green)",
               background: "var(--accent-green-dim)",
               color: "var(--accent-green)", fontSize: "11px", fontWeight: "700",
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              cursor: "pointer", fontFamily: "inherit",
               display: "flex", alignItems: "center", justifyContent: "center", gap: "5px",
               transition: "all 0.15s ease",
             }}
@@ -237,10 +238,12 @@ function DayCard({
   group,
   onOpenTrade,
   onOpenEditor,
+  compact,
 }: {
   group: DayGroup;
   onOpenTrade: (t: Trade) => void;
   onOpenEditor: (t: Trade) => void;
+  compact: boolean;
 }) {
   const [expanded, setExpanded] = useState(true);
   const isGreen = group.totalPnl >= 0;
@@ -327,7 +330,7 @@ function DayCard({
         <div style={{
           padding: "16px",
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+          gridTemplateColumns: compact ? "1fr" : "repeat(auto-fill, minmax(340px, 1fr))",
           gap: "10px",
         }}>
           {group.trades.map((trade) => (
@@ -346,6 +349,7 @@ function DayCard({
 
 export default function JournalPage() {
   const { trades, setSelectedTrade, setActivePage, setActiveTradeId } = useApp();
+  const { isMobile, isTablet } = useResponsive();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "win" | "loss">("all");
   const [filterTag, setFilterTag] = useState("");
@@ -431,7 +435,7 @@ export default function JournalPage() {
 
       {/* Stats strip */}
       <div style={{
-        display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
+        display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(4, 1fr)",
         gap: "12px", marginBottom: "24px",
       }}>
         {[
@@ -496,7 +500,7 @@ export default function JournalPage() {
         display: "flex", gap: "10px", marginBottom: "24px",
         alignItems: "center", flexWrap: "wrap",
       }}>
-        <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
+        <div style={{ position: "relative", flex: 1, minWidth: isMobile ? "100%" : "200px" }}>
           <Search
             size={14}
             color="var(--text-muted)"
@@ -510,7 +514,7 @@ export default function JournalPage() {
               width: "100%", padding: "9px 12px 9px 34px", borderRadius: "8px",
               border: "1px solid var(--border)", background: "var(--bg-card)",
               color: "var(--text-primary)", fontSize: "13px",
-              fontFamily: "'DM Sans', sans-serif", boxSizing: "border-box" as const,
+              fontFamily: "inherit", boxSizing: "border-box" as const,
               outline: "none",
             }}
           />
@@ -533,7 +537,7 @@ export default function JournalPage() {
                   ? status === "win" ? "#00e57a" : status === "loss" ? "#ff4d6a" : "var(--accent-green)"
                   : "var(--text-muted)",
                 fontSize: "12px", fontWeight: "600", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "inherit",
               }}
             >
               {status === "all" ? "All" : status === "win" ? "Wins" : "Losses"}
@@ -555,7 +559,7 @@ export default function JournalPage() {
                 padding: "8px 12px 8px 28px", borderRadius: "8px",
                 border: "1px solid var(--border)", background: "var(--bg-card)",
                 color: filterTag ? "var(--accent-green)" : "var(--text-muted)",
-                fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+                fontSize: "12px", fontFamily: "inherit",
                 cursor: "pointer", appearance: "none" as const,
                 outline: "none",
               }}
@@ -584,6 +588,7 @@ export default function JournalPage() {
             group={group}
             onOpenTrade={(trade) => setSelectedTrade(trade)}
             onOpenEditor={openEditor}
+            compact={isMobile}
           />
         ))
       )}

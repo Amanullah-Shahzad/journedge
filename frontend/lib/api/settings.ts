@@ -37,6 +37,9 @@ export function useLatestReleaseQuery() {
     queryKey: queryKeys.settings.latestRelease(),
     queryFn: getLatestRelease,
     retry: false,
+    staleTime: 5 * 60_000,
+    gcTime: 15 * 60_000,
+    refetchOnMount: false,
   });
 }
 

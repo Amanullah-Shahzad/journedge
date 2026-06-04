@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { useApp } from "../context/AppContext";
+import { useResponsive } from "../hooks/useResponsive";
 
 type ParseStatus = "idle" | "success" | "error" | "importing";
 type BrokerSource = "journedge" | "fidelity" | "tdameritrade" | "tastytrade" | "ibkr";
@@ -106,6 +107,7 @@ function previewTrades(result: ImportPreview): Trade[] {
 
 export default function ImportPage() {
   const { activeAccount, reloadTrades, setActivePage } = useApp();
+  const { isMobile, isTablet } = useResponsive();
   const previewImportMutation = usePreviewImportMutation();
   const commitImportMutation = useCommitImportMutation();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -181,19 +183,20 @@ export default function ImportPage() {
   };
 
   const trades = result ? previewTrades(result) : [];
+  const cardsGrid = isMobile ? "1fr" : "1fr 1fr";
 
   return (
     <div>
       <div style={{ marginBottom: "32px" }}>
-        <h2 style={{ fontSize: "26px", fontWeight: "700", color: "#f0f0ff", letterSpacing: "-0.5px" }}>
+        <h2 style={{ fontSize: "26px", fontWeight: "700", color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
           Import Trades
         </h2>
-        <p style={{ color: "#8888aa", fontSize: "14px", marginTop: "4px" }}>
+        <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
           {activeAccount ? `Importing into: ${activeAccount.name} (${activeAccount.broker})` : "No account selected - trades will be unlinked"}
         </p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "24px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: cardsGrid, gap: "12px", marginBottom: "24px" }}>
         {BROKER_CARDS.map((card) => (
           <div
             key={card.label}
@@ -202,11 +205,11 @@ export default function ImportPage() {
               border: `1px solid ${card.border}`,
               borderRadius: "12px",
               padding: "16px",
-              gridColumn: card.fullWidth ? "1 / -1" : undefined,
+              gridColumn: !isMobile && card.fullWidth ? "1 / -1" : undefined,
             }}
           >
             <div style={{ fontSize: "12px", fontWeight: "700", color: card.color, marginBottom: "6px" }}>{card.label}</div>
-            <div style={{ fontSize: "12px", color: "#8888aa", lineHeight: "1.5" }}>{card.desc}</div>
+            <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.5" }}>{card.desc}</div>
           </div>
         ))}
       </div>
@@ -224,7 +227,7 @@ export default function ImportPage() {
         style={{
           border: `2px dashed ${dragging ? "var(--accent-green)" : "var(--border)"}`,
           borderRadius: "16px",
-          padding: "64px 32px",
+          padding: isMobile ? "40px 18px" : "64px 32px",
           textAlign: "center",
           cursor: status === "idle" ? "pointer" : "default",
           background: dragging ? "var(--accent-green-dim)" : "var(--bg-card)",
@@ -260,8 +263,8 @@ export default function ImportPage() {
             >
               <Upload size={24} color="var(--accent-green)" />
             </div>
-            <div style={{ fontSize: "18px", fontWeight: "700", color: "#f0f0ff", marginBottom: "8px" }}>Drop your CSV here</div>
-            <div style={{ fontSize: "14px", color: "#8888aa" }}>Format is auto-detected - no configuration needed</div>
+            <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>Drop your CSV here</div>
+            <div style={{ fontSize: "14px", color: "var(--text-muted)" }}>Format is auto-detected - no configuration needed</div>
           </>
         )}
 
@@ -269,10 +272,10 @@ export default function ImportPage() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
             <CheckCircle size={36} color="var(--accent-green)" />
             <div>
-              <div style={{ fontSize: "16px", fontWeight: "700", color: "#f0f0ff", marginBottom: "8px" }}>{message}</div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                <FileText size={12} color="#8888aa" />
-                <span style={{ fontSize: "12px", color: "#8888aa" }}>{fileName}</span>
+              <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>{message}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
+                <FileText size={12} color="var(--text-muted)" />
+                <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{fileName}</span>
                 <FormatBadge source={result.source} />
               </div>
             </div>
@@ -296,10 +299,10 @@ export default function ImportPage() {
                 borderRadius: "8px",
                 border: "1px solid var(--border)",
                 background: "transparent",
-                color: "#8888aa",
+                color: "var(--text-muted)",
                 fontSize: "12px",
                 cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "inherit",
               }}
             >
               <RefreshCw size={12} />
@@ -320,7 +323,7 @@ export default function ImportPage() {
                 animation: "spin 0.8s linear infinite",
               }}
             />
-            <div style={{ fontSize: "14px", color: "#8888aa" }}>Saving trades...</div>
+            <div style={{ fontSize: "14px", color: "var(--text-muted)" }}>Saving trades...</div>
           </div>
         )}
       </div>
@@ -329,8 +332,10 @@ export default function ImportPage() {
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: isMobile ? "stretch" : "center",
             justifyContent: "space-between",
+            flexDirection: isTablet ? "column" : "row",
+            gap: "14px",
             marginTop: "20px",
             padding: "16px 20px",
             background: "var(--bg-card)",
@@ -338,31 +343,33 @@ export default function ImportPage() {
             borderRadius: "12px",
           }}
         >
-          <div style={{ fontSize: "13px", color: "#8888aa" }}>
+          <div style={{ fontSize: "13px", color: "var(--text-muted)", width: "100%" }}>
             <span style={{ color: "var(--accent-green)", fontWeight: "700" }}>{result.validRows} trades</span>
             {" "}will be added to{" "}
-            <span style={{ color: "#f0f0ff", fontWeight: "600" }}>{activeAccount?.name || "no account"}</span>
+            <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{activeAccount?.name || "no account"}</span>
             {!activeAccount && (
               <span style={{ color: "#fb923c", marginLeft: "8px", fontSize: "11px" }}>
                 - create an account first to track equity
               </span>
             )}
           </div>
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", width: isMobile ? "100%" : "auto", flexWrap: "wrap" }}>
             <button
               onClick={reset}
               style={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "6px",
                 padding: "9px 16px",
                 borderRadius: "8px",
                 border: "1px solid var(--border)",
                 background: "transparent",
-                color: "#8888aa",
+                color: "var(--text-muted)",
                 fontSize: "13px",
                 cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "inherit",
+                width: isMobile ? "100%" : "auto",
               }}
             >
               <X size={13} />
@@ -373,6 +380,7 @@ export default function ImportPage() {
               style={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "8px",
                 padding: "9px 20px",
                 borderRadius: "8px",
@@ -382,7 +390,8 @@ export default function ImportPage() {
                 fontSize: "13px",
                 fontWeight: "700",
                 cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "inherit",
+                width: isMobile ? "100%" : "auto",
               }}
             >
               Confirm Import
@@ -397,7 +406,7 @@ export default function ImportPage() {
           <div
             style={{
               fontSize: "12px",
-              color: "#8888aa",
+              color: "var(--text-muted)",
               marginBottom: "10px",
               fontWeight: "600",
               textTransform: "uppercase",
@@ -406,89 +415,113 @@ export default function ImportPage() {
           >
             Preview - first {Math.min(trades.length, 10)} of {result.validRows}
           </div>
-          <div style={{ overflowX: "auto", borderRadius: "12px", border: "1px solid var(--border)" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
-                  {["Date", "Symbol", "Type", "Qty", "Entry", "Exit", "P&L", "Tags"].map((heading) => (
-                    <th
-                      key={heading}
-                      style={{
-                        padding: "10px 14px",
-                        textAlign: "left",
-                        color: "#8888aa",
-                        fontWeight: "600",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {heading}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {trades.slice(0, 10).map((trade) => (
-                  <tr key={trade.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                    <td style={{ padding: "10px 14px", color: "#8888aa" }}>{trade.date}</td>
-                    <td style={{ padding: "10px 14px", color: "#f0f0ff", fontWeight: "700" }}>{trade.underlying}</td>
-                    <td style={{ padding: "10px 14px" }}>
-                      {trade.optionType ? (
-                        <span
-                          style={{
-                            padding: "2px 8px",
-                            borderRadius: "4px",
-                            fontSize: "10px",
-                            fontWeight: "700",
-                            background: trade.optionType === "call" ? "rgba(77,159,255,0.15)" : "rgba(255,77,106,0.15)",
-                            color: trade.optionType === "call" ? "#4d9fff" : "#ff4d6a",
-                          }}
-                        >
-                          {trade.optionType.toUpperCase()} {trade.strike ? `$${trade.strike}` : ""}
-                        </span>
-                      ) : (
-                        <span
-                          style={{
-                            padding: "2px 8px",
-                            borderRadius: "4px",
-                            fontSize: "10px",
-                            fontWeight: "700",
-                            background: "rgba(255,255,255,0.06)",
-                            color: "#8888aa",
-                          }}
-                        >
-                          {trade.type.toUpperCase()}
-                        </span>
-                      )}
-                    </td>
-                    <td style={{ padding: "10px 14px", color: "#8888aa" }}>{trade.quantity}</td>
-                    <td style={{ padding: "10px 14px", color: "#8888aa" }}>${trade.entryPrice}</td>
-                    <td style={{ padding: "10px 14px", color: "#8888aa" }}>${trade.exitPrice}</td>
-                    <td style={{ padding: "10px 14px", fontWeight: "700", color: trade.pnl >= 0 ? "#00e57a" : "#ff4d6a" }}>
+          {isMobile ? (
+            <div style={{ display: "grid", gap: "12px" }}>
+              {trades.slice(0, 10).map((trade) => (
+                <div key={trade.id} className="surface-card" style={{ padding: "14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "8px" }}>
+                    <div>
+                      <div style={{ color: "var(--text-primary)", fontWeight: "700", fontSize: "14px" }}>{trade.underlying}</div>
+                      <div style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "2px" }}>{trade.date}</div>
+                    </div>
+                    <div style={{ color: trade.pnl >= 0 ? "#00e57a" : "#ff4d6a", fontWeight: "800", fontSize: "15px" }}>
                       {trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}
-                    </td>
-                    <td style={{ padding: "10px 14px" }}>
-                      <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-                        {(trade.tags || []).slice(0, 2).map((tag) => (
+                    </div>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px", color: "var(--text-secondary)" }}>
+                    <span>Qty {trade.quantity}</span>
+                    <span>{trade.type.toUpperCase()}</span>
+                    <span>Entry ${trade.entryPrice}</span>
+                    <span>Exit ${trade.exitPrice}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ overflowX: "auto", borderRadius: "12px", border: "1px solid var(--border)" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", minWidth: "760px" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
+                    {["Date", "Symbol", "Type", "Qty", "Entry", "Exit", "P&L", "Tags"].map((heading) => (
+                      <th
+                        key={heading}
+                        style={{
+                          padding: "10px 14px",
+                          textAlign: "left",
+                          color: "var(--text-muted)",
+                          fontWeight: "600",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {heading}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {trades.slice(0, 10).map((trade) => (
+                    <tr key={trade.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                      <td style={{ padding: "10px 14px", color: "var(--text-muted)" }}>{trade.date}</td>
+                      <td style={{ padding: "10px 14px", color: "var(--text-primary)", fontWeight: "700" }}>{trade.underlying}</td>
+                      <td style={{ padding: "10px 14px" }}>
+                        {trade.optionType ? (
                           <span
-                            key={tag}
                             style={{
-                              padding: "1px 6px",
+                              padding: "2px 8px",
                               borderRadius: "4px",
                               fontSize: "10px",
-                              background: "rgba(255,255,255,0.06)",
-                              color: "#8888aa",
+                              fontWeight: "700",
+                              background: trade.optionType === "call" ? "rgba(77,159,255,0.15)" : "rgba(255,77,106,0.15)",
+                              color: trade.optionType === "call" ? "#4d9fff" : "#ff4d6a",
                             }}
                           >
-                            {tag}
+                            {trade.optionType.toUpperCase()} {trade.strike ? `$${trade.strike}` : ""}
                           </span>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        ) : (
+                          <span
+                            style={{
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              fontWeight: "700",
+                              background: "rgba(255,255,255,0.06)",
+                              color: "var(--text-muted)",
+                            }}
+                          >
+                            {trade.type.toUpperCase()}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: "10px 14px", color: "var(--text-muted)" }}>{trade.quantity}</td>
+                      <td style={{ padding: "10px 14px", color: "var(--text-muted)" }}>${trade.entryPrice}</td>
+                      <td style={{ padding: "10px 14px", color: "var(--text-muted)" }}>${trade.exitPrice}</td>
+                      <td style={{ padding: "10px 14px", fontWeight: "700", color: trade.pnl >= 0 ? "#00e57a" : "#ff4d6a" }}>
+                        {trade.pnl >= 0 ? "+" : ""}${trade.pnl.toFixed(2)}
+                      </td>
+                      <td style={{ padding: "10px 14px" }}>
+                        <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                          {(trade.tags || []).slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              style={{
+                                padding: "1px 6px",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                                background: "rgba(255,255,255,0.06)",
+                                color: "var(--text-muted)",
+                              }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

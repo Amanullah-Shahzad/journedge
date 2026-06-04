@@ -7,6 +7,7 @@ import type { Trade } from "@/lib/api/types";
 import { BarChart2, Calendar, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, X } from "lucide-react";
 
 import { useApp } from "../context/AppContext";
+import { useResponsive } from "../hooks/useResponsive";
 
 const MONTHS = [
   "January",
@@ -42,6 +43,7 @@ function normalizeDate(dateStr: string): string {
 
 export default function CalendarPage() {
   const { trades, activeAccount, setSelectedTrade } = useApp();
+  const { isMobile, isTablet } = useResponsive();
   const today = new Date();
 
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -144,15 +146,15 @@ export default function CalendarPage() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", marginBottom: "24px", gap: "16px", flexWrap: "wrap" }}>
         <div>
           <h2 style={{ fontSize: "26px", fontWeight: "700", color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
             Calendar
           </h2>
           <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>Your trading performance at a glance</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <div style={{ display: "flex", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: isMobile ? "stretch" : "center", gap: "16px", flexWrap: "wrap", width: isMobile ? "100%" : "auto" }}>
+          <div style={{ display: "flex", gap: "12px", flex: isMobile ? "1 1 100%" : undefined, flexWrap: "wrap" }}>
             <div
               style={{
                 background: "var(--bg-card)",
@@ -185,7 +187,7 @@ export default function CalendarPage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: isMobile ? "space-between" : "flex-start", gap: "12px", width: isMobile ? "100%" : "auto" }}>
             <button
               onClick={prevMonth}
               style={{
@@ -201,7 +203,7 @@ export default function CalendarPage() {
             >
               <ChevronLeft size={16} />
             </button>
-            <span style={{ fontSize: "16px", fontWeight: "700", color: "var(--text-primary)", minWidth: "160px", textAlign: "center" }}>
+            <span style={{ fontSize: "16px", fontWeight: "700", color: "var(--text-primary)", minWidth: isMobile ? "0" : "160px", flex: 1, textAlign: "center" }}>
               {MONTHS[currentMonth]} {currentYear}
             </span>
             <button
@@ -224,7 +226,7 @@ export default function CalendarPage() {
       </div>
 
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "16px", overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(90px, 1fr))", borderBottom: "1px solid var(--border)", overflowX: "auto" }}>
           {DAYS.map((day) => (
             <div
               key={day}
@@ -242,7 +244,7 @@ export default function CalendarPage() {
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(90px, 1fr))", overflowX: "auto" }}>
           {Array.from({ length: firstDay }).map((_, index) => (
             <div
               key={`empty-${index}`}
@@ -344,7 +346,7 @@ export default function CalendarPage() {
       </div>
 
       {tradingDaysCount > 0 ? (
-        <div style={{ marginTop: "24px", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+        <div style={{ marginTop: "24px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(4, 1fr)", gap: "16px" }}>
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "6px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <Calendar size={14} color="var(--text-muted)" />
@@ -401,7 +403,7 @@ export default function CalendarPage() {
               position: "fixed",
               top: 0,
               right: 0,
-              width: "480px",
+              width: isMobile ? "100%" : "480px",
               height: "100vh",
               background: "var(--bg-secondary)",
               borderLeft: "1px solid var(--border)",

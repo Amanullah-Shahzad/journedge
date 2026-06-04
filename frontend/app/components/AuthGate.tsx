@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useCurrentUserQuery } from "@/lib/api/auth";
 import { hasAccessToken } from "@/lib/api/session";
@@ -9,20 +9,23 @@ import { hasAccessToken } from "@/lib/api/session";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const tokenPresent = hasAccessToken();
-  const { data, isLoading, isError } = useCurrentUserQuery(tokenPresent);
+  const [mounted, setMounted] = useState(false);
+  const [tokenPresent, setTokenPresent] = useState(false);
+  const { data, isLoading, isError } = useCurrentUserQuery(mounted && tokenPresent);
 
   useEffect(() => {
+    setMounted(true);
+    setTokenPresent(hasAccessToken());
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     if (!tokenPresent || isError) {
       router.replace("/login");
     }
-  }, [isError, router, tokenPresent]);
+  }, [isError, mounted, router, tokenPresent]);
 
-  if (!tokenPresent) {
-    return null;
-  }
-
-  if (isLoading) {
+  if (!mounted || !tokenPresent || isLoading) {
     return (
       <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "var(--bg-primary)", color: "var(--text-primary)" }}>
         Loading...

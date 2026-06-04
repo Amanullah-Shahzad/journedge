@@ -1,9 +1,10 @@
 "use client";
-import { useState, useMemo } from "react";
+import { type ComponentType, useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useExportDatasetQuery } from "@/lib/api/exports";
 import { useApp } from "../context/AppContext";
 import { FileDown, Filter, Layout, Eye, ChevronDown } from "lucide-react";
+import { useResponsive } from "../hooks/useResponsive";
 
 // Single dynamic import wrapping both PDFDownloadLink and TradingReportPDF
 // They must live in the same module boundary — splitting them causes the 'su is not a function' crash
@@ -44,7 +45,7 @@ interface ReportOptions {
 }
 
 // ─── Subcomponents ────────────────────────────────────────────────────────────
-function SectionHeading({ icon: Icon, label }: { icon: any; label: string }) {
+function SectionHeading({ icon: Icon, label }: { icon: ComponentType<{ size?: number; color?: string }>; label: string }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: "8px",
@@ -154,7 +155,7 @@ function MultiSelect({
           color: selected.length > 0 ? "var(--text-primary)" : "var(--text-muted)",
           fontSize: "12px", cursor: "pointer", display: "flex",
           alignItems: "center", justifyContent: "space-between",
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "inherit",
         }}
       >
         <span>
@@ -188,7 +189,7 @@ function MultiSelect({
                 color: selected.includes(opt) ? "var(--accent-green)" : "var(--text-primary)",
                 fontSize: "12px", cursor: "pointer", textAlign: "left",
                 display: "flex", alignItems: "center", gap: "8px",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "inherit",
               }}
             >
               <div style={{
@@ -341,6 +342,7 @@ function LivePreview({
 // ─── Main Export Page ─────────────────────────────────────────────────────────
 export default function ExportPage() {
   const { trades, activeAccount } = useApp();
+  const { isMobile, isTablet } = useResponsive();
 
   const [options, setOptions] = useState<ReportOptions>({
     dateFrom: "", dateTo: "",
@@ -385,15 +387,16 @@ export default function ExportPage() {
 
   // ── Render ──
   return (
-    <div style={{ display: "flex", gap: "24px", height: "calc(100vh - 64px)", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "24px", minHeight: isTablet ? "auto" : "calc(100vh - 64px)" }}>
 
       {/* ── Left Panel: Report Builder ── */}
       <div style={{
-        width: "340px", minWidth: "340px",
+        width: isTablet ? "100%" : "340px", minWidth: isTablet ? "0" : "340px",
         background: "var(--bg-secondary)",
         border: "1px solid var(--border)", borderRadius: "12px",
-        padding: "24px", overflowY: "auto",
+        padding: isMobile ? "18px" : "24px", overflowY: "auto",
         display: "flex", flexDirection: "column",
+        maxHeight: isTablet ? "none" : "calc(100vh - 64px)",
       }}>
 
         <h2 style={{
@@ -410,7 +413,7 @@ export default function ExportPage() {
         <SectionHeading icon={Filter} label="Filters" />
 
         {/* Date range */}
-        <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+        <div style={{ display: "flex", gap: "8px", marginBottom: "12px", flexDirection: isMobile ? "column" : "row" }}>
           <div style={{ flex: 1 }}>
             <label style={{ fontSize: "11px", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
               From
@@ -423,7 +426,7 @@ export default function ExportPage() {
                 width: "100%", padding: "7px 10px", borderRadius: "8px",
                 border: "1px solid var(--border)", background: "var(--bg-card)",
                 color: "var(--text-primary)", fontSize: "12px",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "inherit",
               }}
             />
           </div>
@@ -439,7 +442,7 @@ export default function ExportPage() {
                 width: "100%", padding: "7px 10px", borderRadius: "8px",
                 border: "1px solid var(--border)", background: "var(--bg-card)",
                 color: "var(--text-primary)", fontSize: "12px",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "inherit",
               }}
             />
           </div>
@@ -530,7 +533,8 @@ export default function ExportPage() {
       <div style={{
         flex: 1, background: "var(--bg-secondary)",
         border: "1px solid var(--border)", borderRadius: "12px",
-        padding: "24px", overflowY: "auto",
+        padding: isMobile ? "18px" : "24px", overflowY: "auto",
+        minHeight: isTablet ? "420px" : "calc(100vh - 64px)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
           <Eye size={14} color="var(--accent-green)" />

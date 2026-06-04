@@ -152,7 +152,7 @@ function TemplatePicker({
                       padding: "6px 14px", borderRadius: 6, border: "none",
                       background: "var(--accent-green)", cursor: "pointer",
                       color: "#000", fontSize: 12, fontWeight: 700,
-                      fontFamily: "'DM Sans', sans-serif",
+                      fontFamily: "inherit",
                     }}
                   >
                     Apply
@@ -224,7 +224,7 @@ function SaveTemplateModal({ onSave, onClose }: {
               width: "100%", padding: "10px 12px", borderRadius: 8,
               border: "1px solid var(--border)", background: "var(--bg-secondary)",
               color: "var(--text-primary)", fontSize: 13,
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "inherit",
               boxSizing: "border-box" as const, outline: "none",
             }}
           />
@@ -247,7 +247,7 @@ function SaveTemplateModal({ onSave, onClose }: {
                     background: active ? "var(--accent-green-dim)" : "transparent",
                     color: active ? "var(--accent-green)" : "var(--text-muted)",
                     fontSize: 12, fontWeight: 600, cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
+                    fontFamily: "inherit", transition: "all 0.15s",
                   }}
                 >
                   {opt.label}
@@ -270,7 +270,7 @@ function SaveTemplateModal({ onSave, onClose }: {
               color: name.trim() ? "#000" : "var(--text-muted)",
               fontSize: 13, fontWeight: 700,
               cursor: name.trim() ? "pointer" : "not-allowed",
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "inherit",
             }}
           >
             Save Template
@@ -281,7 +281,7 @@ function SaveTemplateModal({ onSave, onClose }: {
               padding: "11px 18px", borderRadius: 8,
               border: "1px solid var(--border)", background: "transparent",
               color: "var(--text-primary)", fontSize: 13,
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              cursor: "pointer", fontFamily: "inherit",
             }}
           >
             Cancel
@@ -341,7 +341,7 @@ export default function JournalEditorPage() {
           "outline: none",
           "min-height: 400px",
           "padding: 28px 32px",
-          "font-family: 'DM Sans', sans-serif",
+          "font-family: inherit",
           "font-size: 15px",
           "line-height: 1.85",
           "color: var(--text-primary)",
@@ -454,7 +454,7 @@ export default function JournalEditorPage() {
             padding: "10px 20px", borderRadius: 8, border: "none",
             background: "var(--accent-green)", color: "#000",
             fontSize: 13, fontWeight: 700, cursor: "pointer",
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "inherit",
           }}
         >
           Back to Journal
@@ -474,7 +474,7 @@ export default function JournalEditorPage() {
             display: "flex", alignItems: "center", gap: 8,
             background: "none", border: "none", cursor: "pointer",
             color: "var(--text-muted)", fontSize: 13,
-            fontFamily: "'DM Sans', sans-serif", padding: "6px 0",
+            fontFamily: "inherit", padding: "6px 0",
           }}
           onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-primary)"}
           onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-muted)"}
@@ -501,7 +501,7 @@ export default function JournalEditorPage() {
               padding: "7px 14px", borderRadius: 8,
               border: "1px solid var(--border)", background: "transparent",
               color: "var(--text-muted)", fontSize: 12, fontWeight: 600,
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              cursor: "pointer", fontFamily: "inherit",
             }}
             onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--accent-green)"}
             onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--border)"}
@@ -516,7 +516,7 @@ export default function JournalEditorPage() {
               padding: "7px 14px", borderRadius: 8,
               border: "1px solid var(--border)", background: "transparent",
               color: "var(--text-muted)", fontSize: 12, fontWeight: 600,
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              cursor: "pointer", fontFamily: "inherit",
             }}
             onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--accent-green)"}
             onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--border)"}
@@ -589,7 +589,7 @@ export default function JournalEditorPage() {
           style={{ display: "none" }} onChange={handleImageUpload}
         />
         <div style={{ flex: 1, overflowY: "auto" }}>
-          <EditorContent editor={editor} style={{ height: "100%" }} />
+          <EditorContent editor={editor} className="journal-editor-body" style={{ height: "100%" }} />
         </div>
       </div>
 
@@ -614,10 +614,10 @@ export default function JournalEditorPage() {
           content: attr(data-placeholder); float: left;
           color: var(--text-muted); pointer-events: none; height: 0;
         }
-        .ProseMirror h1 { font-size: 26px; font-weight: 800; color: var(--text-primary); margin: 22px 0 10px; font-family: 'Syne', sans-serif; letter-spacing: -0.5px; }
-        .ProseMirror h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin: 18px 0 8px;  font-family: 'Syne', sans-serif; }
-        .ProseMirror h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 14px 0 6px;  font-family: 'Syne', sans-serif; }
-        .ProseMirror p  { margin: 0 0 10px; }
+        .ProseMirror h1 { font-size: 28px; font-weight: 700; color: var(--text-primary); margin: 22px 0 10px; font-family: inherit; letter-spacing: -0.04em; }
+        .ProseMirror h2 { font-size: 20px; font-weight: 600; color: var(--text-primary); margin: 18px 0 8px;  font-family: inherit; letter-spacing: -0.03em; }
+        .ProseMirror h3 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin: 14px 0 6px;  font-family: inherit; letter-spacing: -0.02em; }
+        .ProseMirror p  { margin: 0 0 12px; }
         .ProseMirror ul, .ProseMirror ol { padding-left: 22px; margin: 8px 0; }
         .ProseMirror li { margin: 4px 0; }
         .ProseMirror hr { border: none; border-top: 1px solid var(--border); margin: 22px 0; }

@@ -12,6 +12,7 @@ import {
   BarChart2, Activity, AlertTriangle, Calendar, Shield, Brain,
 } from "lucide-react";
 import { Trade } from "../lib/types";
+import { useResponsive } from "../hooks/useResponsive";
 
 function stdDev(values: number[]): number {
   if (values.length < 2) return 0;
@@ -169,10 +170,10 @@ function streaks(trades: Trade[]) {
 }
 
 const tooltipStyle = {
-  background: "#16161f", border: "1px solid #2a2a3a",
-  borderRadius: "8px", color: "#f0f0ff", fontSize: "12px",
+  background: "var(--bg-card)", border: "1px solid var(--border)",
+  borderRadius: "8px", color: "var(--text-primary)", fontSize: "12px",
 };
-const axisStyle = { fontSize: 10, fill: "#8888aa" };
+const axisStyle = { fontSize: 10, fill: "var(--text-muted)" };
 
 function SectionCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
@@ -221,7 +222,7 @@ function Tab({ label, active, onClick }: { label: string; active: boolean; onCli
         background: active ? "var(--accent-green-dim)" : "transparent",
         color: active ? "var(--accent-green)" : "var(--text-muted)",
         fontSize: "13px", fontWeight: active ? "700" : "400",
-        fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s ease",
+        fontFamily: "inherit", transition: "all 0.15s ease",
       }}
     >
       {label}
@@ -233,9 +234,14 @@ type TabId = "overview" | "risk" | "time" | "rmultiples" | "execution" | "behavi
 
 export default function AnalyticsPage() {
   const { trades, activeAccount } = useApp();
+  const { isMobile, isTablet } = useResponsive();
   const analyticsSummaryQuery = useAnalyticsSummaryQuery(activeAccount?.id ?? null);
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [riskPct, setRiskPct]     = useState(2);
+  const grid4 = isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(4, 1fr)";
+  const grid3 = isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(3, 1fr)";
+  const grid5 = isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(5, 1fr)";
+  const splitGrid = isMobile ? "1fr" : "1fr 1fr";
 
   const stats = useMemo(() => {
     if (trades.length === 0 || !analyticsSummaryQuery.data) return null;
@@ -482,13 +488,13 @@ export default function AnalyticsPage() {
       {/* Overview */}
       {activeTab === "overview" && (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: grid4, gap: "12px", marginBottom: "20px" }}>
             <MetricCard label="Total P&L"     value={`${stats.totalPnl >= 0 ? "+" : ""}$${stats.totalPnl.toFixed(2)}`} positive={stats.totalPnl >= 0} icon={TrendingUp} />
             <MetricCard label="Win Rate"      value={`${stats.winRate.toFixed(1)}%`} positive={stats.winRate >= 50} icon={Target} sub={`${stats.wins.length}W · ${stats.losses.length}L`} />
             <MetricCard label="Profit Factor" value={stats.profitFactor.toFixed(2)} positive={stats.profitFactor >= 1} icon={Zap} sub="Avg W / Avg L" />
             <MetricCard label="Expectancy"    value={`${stats.exp >= 0 ? "+" : ""}$${stats.exp.toFixed(2)}`} positive={stats.exp >= 0} icon={Activity} sub="Per trade" />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: grid4, gap: "12px", marginBottom: "20px" }}>
             <MetricCard label="Avg Win"    value={`+$${stats.avgWin.toFixed(2)}`}   positive icon={Award} />
             <MetricCard label="Avg Loss"   value={`-$${stats.avgLoss.toFixed(2)}`}  positive={false} icon={TrendingDown} />
             <MetricCard label="Best Trade" value={`+$${stats.bestTrade.pnl.toFixed(2)}`} positive icon={Award} sub={stats.bestTrade.underlying} />
@@ -513,7 +519,7 @@ export default function AnalyticsPage() {
             </ResponsiveContainer>
           </SectionCard>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: splitGrid, gap: "20px" }}>
             <SectionCard title="P&L by Symbol">
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={stats.symbolData.slice(0, 10)}>
@@ -572,7 +578,7 @@ export default function AnalyticsPage() {
             )}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginTop: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: grid4, gap: "12px", marginTop: "20px" }}>
             <MetricCard label="Max Win Streak"  value={`${stats.streak.maxWinStreak}`} positive neutral={stats.streak.maxWinStreak === 0} icon={TrendingUp} sub="Consecutive wins" />
             <MetricCard label="Max Loss Streak" value={`${stats.streak.maxLossStreak}`} positive={stats.streak.maxLossStreak <= 2} icon={TrendingDown} sub="Consecutive losses" />
             <MetricCard
@@ -591,7 +597,7 @@ export default function AnalyticsPage() {
       {/* Risk Metrics */}
       {activeTab === "risk" && (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: grid3, gap: "12px", marginBottom: "20px" }}>
             <MetricCard label="Sharpe Ratio" value={stats.sharpe.toFixed(2)} positive={stats.sharpe > 1} neutral={stats.sharpe === 0} icon={Activity}
               sub={stats.sharpe > 2 ? "Excellent" : stats.sharpe > 1 ? "Good" : stats.sharpe > 0 ? "Below avg" : "N/A (<5 days)"} />
             <MetricCard label="Sortino Ratio" value={stats.sortino.toFixed(2)} positive={stats.sortino > 1} neutral={stats.sortino === 0} icon={TrendingUp}
@@ -599,7 +605,7 @@ export default function AnalyticsPage() {
             <MetricCard label="Calmar Ratio" value={stats.calmar === 0 ? "N/A" : stats.calmar.toFixed(2)} positive={stats.calmar > 1} neutral={stats.calmar === 0} icon={Zap} sub="Annualized return / Max DD" />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: grid3, gap: "12px", marginBottom: "20px" }}>
             <MetricCard label="Max Drawdown" value={`$${Math.abs(stats.maxDd).toFixed(2)}`} positive={false} neutral={stats.maxDd === 0} icon={TrendingDown}
               sub={stats.maxDdPct !== 0 ? `${stats.maxDdPct.toFixed(2)}% from peak` : "No drawdown"} />
             <MetricCard label="Max DD Duration" value={stats.longestDdDays === 0 ? "0 days" : `${stats.longestDdDays}d`} positive={stats.longestDdDays < 7} neutral={stats.longestDdDays === 0} icon={Calendar} sub="Longest peak → recovery" />
@@ -642,7 +648,7 @@ export default function AnalyticsPage() {
           )}
 
           <SectionCard title="Metric Definitions">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: splitGrid, gap: "16px" }}>
               {[
                 { name: "Sharpe Ratio",  formula: "(Mean Daily P&L / Std Dev Daily P&L) × √252",  what: "Risk-adjusted return per unit of total volatility. >1 = good, >2 = excellent." },
                 { name: "Sortino Ratio", formula: "(Mean Daily P&L / Downside Std Dev) × √252",   what: "Like Sharpe but only penalises downside volatility. More relevant for traders." },
@@ -664,7 +670,7 @@ export default function AnalyticsPage() {
       {activeTab === "time" && (
         <>
           <SectionCard title="P&L by Day of Week" subtitle="Which days are most profitable.">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "12px", marginBottom: "24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: grid5, gap: "12px", marginBottom: "24px" }}>
               {stats.dowData.map(({ day, pnl, count, wr }) => (
                 <div key={day} style={{ background: "var(--bg-secondary)", borderRadius: "12px", padding: "16px", borderTop: `3px solid ${pnl >= 0 ? "#00e57a" : "#ff4d6a"}`, textAlign: "center" }}>
                   <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-muted)", marginBottom: "8px" }}>{day}</div>
@@ -729,7 +735,7 @@ export default function AnalyticsPage() {
       {/* R-Multiples */}
       {activeTab === "rmultiples" && (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: grid3, gap: "12px", marginBottom: "20px" }}>
             <MetricCard label="Avg R-Multiple" value={stats.avgR >= 0 ? `+${stats.avgR.toFixed(2)}R` : `${stats.avgR.toFixed(2)}R`} positive={stats.avgR > 0} icon={Activity} sub="Mean outcome in R-units" />
             <MetricCard label="1R = Avg Loss"  value={`$${stats.avgLoss.toFixed(2)}`} neutral icon={Target} sub="Risk proxy (avg loss amount)" />
             <MetricCard label="Expectancy"     value={`${stats.exp >= 0 ? "+" : ""}${(stats.avgLoss > 0 ? stats.exp / stats.avgLoss : 0).toFixed(2)}R`} positive={stats.exp >= 0} icon={Zap} sub="Expected R per trade" />
@@ -802,7 +808,7 @@ export default function AnalyticsPage() {
                 {stats.maeFdCount} of {trades.length} trades have MAE/MFE logged
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: grid4, gap: "12px", marginBottom: "20px" }}>
                 <MetricCard label="Avg MAE" value={`$${stats.avgMae.toFixed(2)}`} positive={false} icon={TrendingDown} sub="Avg worst excursion" />
                 <MetricCard label="Avg MFE" value={`$${stats.avgMfe.toFixed(2)}`} positive icon={TrendingUp} sub="Avg best excursion" />
                 <MetricCard label="Entry Efficiency" value={`${stats.entryEff.toFixed(1)}%`} positive={stats.entryEff >= 60} icon={Target}
@@ -828,7 +834,7 @@ export default function AnalyticsPage() {
               </SectionCard>
 
               <SectionCard title="How to Use These Numbers">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: splitGrid, gap: "16px" }}>
                   {[
                     {
                       name: "Entry Efficiency",
@@ -875,7 +881,7 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: grid4, gap: "12px", marginBottom: "20px" }}>
             <MetricCard
               label="Discipline Score"
               value={`${stats.disciplineScore}/100`}
@@ -961,7 +967,7 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: splitGrid, gap: "20px", marginBottom: "20px" }}>
             {/* Inputs */}
             <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "16px", padding: "24px" }}>
               <h4 style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "16px" }}>Inputs</h4>

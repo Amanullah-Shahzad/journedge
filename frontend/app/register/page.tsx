@@ -15,7 +15,7 @@ const fieldStyle: React.CSSProperties = {
   padding: "12px 14px",
   color: "var(--text-primary)",
   marginBottom: 12,
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "inherit",
 };
 
 
@@ -27,7 +27,7 @@ const buttonStyle: React.CSSProperties = {
   background: "var(--accent-green)",
   color: "#000",
   fontWeight: 700,
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "inherit",
   cursor: "pointer",
 };
 

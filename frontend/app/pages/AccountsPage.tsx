@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { Account } from "../lib/types";
 import { Wallet, Plus, Check, Trash2, ChevronDown } from "lucide-react";
+import { useResponsive } from "../hooks/useResponsive";
 
 const BROKERS = [
   "Fidelity", "TD Ameritrade", "Charles Schwab", "Interactive Brokers",
@@ -13,7 +14,7 @@ const BROKERS = [
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "10px 12px", borderRadius: "8px",
   border: "1px solid var(--border)", background: "var(--bg-secondary)",
-  color: "#f0f0ff", fontSize: "13px", fontFamily: "'DM Sans', sans-serif",
+  color: "var(--text-primary)", fontSize: "13px", fontFamily: "inherit",
   boxSizing: "border-box", outline: "none",
 };
 
@@ -28,7 +29,7 @@ function SelectWrapper({ children }: { children: React.ReactNode }) {
     <div style={{ position: "relative" }}>
       {children}
       <ChevronDown
-        size={14} color="#8888aa"
+        size={14} color="var(--text-muted)"
         style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
       />
     </div>
@@ -37,15 +38,16 @@ function SelectWrapper({ children }: { children: React.ReactNode }) {
 
 export default function AccountsPage() {
   const { accounts, activeAccount, setActiveAccount, addAccount } = useApp();
+  const { isMobile, isTablet } = useResponsive();
   const createAccountMutation = useCreateAccountMutation();
   const deleteAccountMutation = useDeleteAccountMutation();
-  const [showForm, setShowForm]           = useState(accounts.length === 0);
-  const [name, setName]                   = useState("");
-  const [broker, setBroker]               = useState(BROKERS[0]);
+  const [showForm, setShowForm] = useState(accounts.length === 0);
+  const [name, setName] = useState("");
+  const [broker, setBroker] = useState(BROKERS[0]);
   const [initialBalance, setInitialBalance] = useState("");
-  const [currency, setCurrency]           = useState("USD");
-  const [saving, setSaving]               = useState(false);
-  const [error, setError]                 = useState("");
+  const [currency, setCurrency] = useState("USD");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleCreate = async () => {
     if (!name.trim()) return setError("Account name is required");
@@ -81,15 +83,17 @@ export default function AccountsPage() {
     }
   };
 
+  const formGrid = isMobile ? "1fr" : "1fr 1fr";
+  const cardsGrid = isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(3, 1fr)";
+
   return (
     <div>
-      {/* Header */}
-      <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "flex-start", gap: "16px", flexWrap: "wrap" }}>
         <div>
-          <h2 style={{ fontSize: "26px", fontWeight: "700", color: "#f0f0ff", letterSpacing: "-0.5px" }}>
+          <h2 style={{ fontSize: "26px", fontWeight: "700", color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
             Accounts
           </h2>
-          <p style={{ color: "#8888aa", fontSize: "14px", marginTop: "4px" }}>
+          <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
             Manage your trading accounts and track equity per account
           </p>
         </div>
@@ -97,10 +101,10 @@ export default function AccountsPage() {
           <button
             onClick={() => setShowForm(!showForm)}
             style={{
-              display: "flex", alignItems: "center", gap: "8px",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
               padding: "10px 16px", borderRadius: "8px", border: "none",
               background: "var(--accent-green)", color: "#000", fontSize: "13px",
-              fontWeight: "600", cursor: "pointer",
+              fontWeight: "600", cursor: "pointer", width: isMobile ? "100%" : "auto",
             }}
           >
             <Plus size={15} />
@@ -109,13 +113,12 @@ export default function AccountsPage() {
         )}
       </div>
 
-      {/* Create Form */}
       {showForm && (
         <div style={{
           background: "var(--bg-card)", border: "1px solid var(--border)",
           borderRadius: "16px", padding: "24px", marginBottom: "24px",
         }}>
-          <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#f0f0ff", marginBottom: "20px" }}>
+          <h3 style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "20px" }}>
             {accounts.length === 0 ? "Create your first account" : "New Account"}
           </h3>
 
@@ -129,9 +132,9 @@ export default function AccountsPage() {
             </div>
           )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: formGrid, gap: "16px" }}>
             <div>
-              <label style={{ fontSize: "12px", color: "#8888aa", fontWeight: "600", display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: "600", display: "block", marginBottom: "6px" }}>
                 Account Name
               </label>
               <input
@@ -143,7 +146,7 @@ export default function AccountsPage() {
             </div>
 
             <div>
-              <label style={{ fontSize: "12px", color: "#8888aa", fontWeight: "600", display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: "600", display: "block", marginBottom: "6px" }}>
                 Broker
               </label>
               <SelectWrapper>
@@ -154,7 +157,7 @@ export default function AccountsPage() {
             </div>
 
             <div>
-              <label style={{ fontSize: "12px", color: "#8888aa", fontWeight: "600", display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: "600", display: "block", marginBottom: "6px" }}>
                 Initial Balance
               </label>
               <input
@@ -166,7 +169,7 @@ export default function AccountsPage() {
             </div>
 
             <div>
-              <label style={{ fontSize: "12px", color: "#8888aa", fontWeight: "600", display: "block", marginBottom: "6px" }}>
+              <label style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: "600", display: "block", marginBottom: "6px" }}>
                 Currency
               </label>
               <SelectWrapper>
@@ -179,7 +182,7 @@ export default function AccountsPage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
+          <div style={{ display: "flex", gap: "12px", marginTop: "20px", flexWrap: "wrap" }}>
             <button
               onClick={handleCreate}
               disabled={saving}
@@ -187,7 +190,7 @@ export default function AccountsPage() {
                 padding: "10px 20px", borderRadius: "8px", border: "none",
                 background: "var(--accent-green)", color: "#000", fontSize: "13px",
                 fontWeight: "600", cursor: saving ? "not-allowed" : "pointer",
-                opacity: saving ? 0.7 : 1,
+                opacity: saving ? 0.7 : 1, width: isMobile ? "100%" : "auto",
               }}
             >
               {saving ? "Creating..." : "Create Account"}
@@ -198,7 +201,8 @@ export default function AccountsPage() {
                 style={{
                   padding: "10px 20px", borderRadius: "8px",
                   border: "1px solid var(--border)", background: "transparent",
-                  color: "#f0f0ff", fontSize: "13px", cursor: "pointer",
+                  color: "var(--text-primary)", fontSize: "13px", cursor: "pointer",
+                  width: isMobile ? "100%" : "auto",
                 }}
               >
                 Cancel
@@ -208,9 +212,8 @@ export default function AccountsPage() {
         </div>
       )}
 
-      {/* Account Cards */}
       {accounts.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: cardsGrid, gap: "16px" }}>
           {accounts.map((account: Account) => {
             const isActive = activeAccount?.id === account.id;
             return (
@@ -241,20 +244,20 @@ export default function AccountsPage() {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   marginBottom: "12px",
                 }}>
-                  <Wallet size={18} color={isActive ? "var(--accent-green)" : "#8888aa"} />
+                  <Wallet size={18} color={isActive ? "var(--accent-green)" : "var(--text-muted)"} />
                 </div>
 
-                <div style={{ fontSize: "16px", fontWeight: "700", color: "#f0f0ff", marginBottom: "4px" }}>
+                <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "4px" }}>
                   {account.name}
                 </div>
-                <div style={{ fontSize: "12px", color: "#8888aa", marginBottom: "16px" }}>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "16px" }}>
                   {account.broker}
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "10px" }}>
                   <div>
-                    <div style={{ fontSize: "11px", color: "#8888aa", marginBottom: "2px" }}>Initial Balance</div>
-                    <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--accent-green)" }}>
+                    <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "2px" }}>Initial Balance</div>
+                    <div style={{ fontSize: "18px", fontWeight: "700", color: "var(--accent-green)", wordBreak: "break-word" }}>
                       {account.currency} {account.initialBalance.toLocaleString()}
                     </div>
                   </div>
@@ -264,6 +267,7 @@ export default function AccountsPage() {
                       background: "rgba(255,77,106,0.1)", border: "none",
                       borderRadius: "6px", padding: "6px", cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
                     <Trash2 size={13} color="#ff4d6a" />

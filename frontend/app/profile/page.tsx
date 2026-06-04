@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAccountsQuery } from "@/lib/api/accounts";
 import { useChangePasswordMutation, useLogoutMutation, useProfileQuery, useUpdateProfileMutation } from "@/lib/api/auth";
 import { useUpdateUserSettingsMutation, useUserSettingsQuery } from "@/lib/api/settings";
+import { useResponsive } from "../hooks/useResponsive";
 
 
 const fieldStyle: React.CSSProperties = {
@@ -16,7 +17,7 @@ const fieldStyle: React.CSSProperties = {
   borderRadius: 10,
   padding: "12px 14px",
   color: "var(--text-primary)",
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "inherit",
   boxSizing: "border-box",
 };
 
@@ -27,7 +28,7 @@ const buttonStyle: React.CSSProperties = {
   background: "var(--accent-green)",
   color: "#000",
   fontWeight: 700,
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "inherit",
   cursor: "pointer",
 };
 
@@ -68,6 +69,7 @@ function Message({ kind, text }: { kind: "success" | "error"; text: string }) {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { isMobile, isTablet } = useResponsive();
   const profileQuery = useProfileQuery();
   const settingsQuery = useUserSettingsQuery();
   const accountsQuery = useAccountsQuery();
@@ -135,14 +137,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)", padding: 32 }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)", padding: isMobile ? 16 : 32 }}>
       <div style={{ maxWidth: 860, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, gap: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", marginBottom: 24, gap: 12, flexWrap: "wrap" }}>
           <div>
             <h1 style={{ color: "var(--text-primary)", fontSize: 28, marginBottom: 8 }}>Profile</h1>
             <p style={{ color: "var(--text-muted)", fontSize: 14 }}>Manage your account, password, and trading preferences.</p>
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", width: isMobile ? "100%" : "auto" }}>
             <Link
               href="/"
               style={{
@@ -152,19 +154,21 @@ export default function ProfilePage() {
                 color: "var(--text-primary)",
                 textDecoration: "none",
                 fontWeight: 600,
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "inherit",
+                textAlign: "center",
+                flex: isMobile ? "1 1 100%" : undefined,
               }}
             >
               Back to workspace
             </Link>
-            <button type="button" onClick={() => void handleLogout()} style={{ ...buttonStyle, background: "#ff9bad", color: "#22040a" }}>
+            <button type="button" onClick={() => void handleLogout()} style={{ ...buttonStyle, background: "#ff9bad", color: "#22040a", flex: isMobile ? "1 1 100%" : undefined }}>
               {logoutMutation.isPending ? "Signing out..." : "Logout"}
             </button>
           </div>
         </div>
 
         <Section title="Account">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 18 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 18 }}>
             <div>
               <div style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 6 }}>Email</div>
               <input value={profileQuery.data.user.email} disabled style={{ ...fieldStyle, opacity: 0.7 }} />
@@ -202,7 +206,7 @@ export default function ProfilePage() {
         </Section>
 
         <Section title="Change Password">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
             <div style={{ gridColumn: "1 / -1" }}>
               <div style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 6 }}>Current password</div>
               <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} style={fieldStyle} />
@@ -245,7 +249,7 @@ export default function ProfilePage() {
         </Section>
 
         <Section title="Trading Preferences">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "1fr 1fr 1fr", gap: 16 }}>
             <div>
               <div style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 6 }}>Timezone</div>
               <input value={timezone} onChange={(event) => setTimezone(event.target.value)} style={fieldStyle} />

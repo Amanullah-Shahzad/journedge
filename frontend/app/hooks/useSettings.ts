@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 
+export type ThemeMode = "dark" | "light" | "system";
+
 export interface Settings {
-  theme: "dark" | "light";
+  theme: ThemeMode;
   accentColor: string;
   defaultMultiplier: number;
   defaultCommission: number;
@@ -10,7 +12,7 @@ export interface Settings {
 }
 
 const DEFAULTS: Settings = {
-  theme: "dark",
+  theme: "system",
   accentColor: "#00e57a",
   defaultMultiplier: 100,
   defaultCommission: 0,
@@ -18,7 +20,8 @@ const DEFAULTS: Settings = {
   currencyFormat: "USD",
 };
 
-const STORAGE_KEY = "journedge_settings";
+export const STORAGE_KEY = "journedge_settings";
+export const SETTINGS_EVENT = "journedge:settings-updated";
 
 const COLOR_MAP: Record<string, { dim: string }> = {
   "#00e57a": { dim: "rgba(0,229,122,0.12)" },
@@ -28,40 +31,93 @@ const COLOR_MAP: Record<string, { dim: string }> = {
   "#f472b6": { dim: "rgba(244,114,182,0.12)" },
 };
 
-function applyAccentColor(value: string) {
+export function getDefaultSettings(): Settings {
+  return { ...DEFAULTS };
+}
+
+export function readStoredSettings(): Settings {
+  if (typeof window === "undefined") {
+    return getDefaultSettings();
+  }
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      return getDefaultSettings();
+    }
+
+    return { ...DEFAULTS, ...JSON.parse(stored) } satisfies Settings;
+  } catch {
+    return getDefaultSettings();
+  }
+}
+
+export function resolveTheme(theme: ThemeMode): "light" | "dark" {
+  if (theme === "system") {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark";
+    }
+    return "light";
+  }
+
+  return theme;
+}
+
+export function applyAccentColor(value: string, root: HTMLElement | null = typeof document !== "undefined" ? document.documentElement : null) {
   const color = COLOR_MAP[value];
-  if (!color) return;
-  const root = document.documentElement;
+  if (!color || !root) return;
   root.style.setProperty("--accent-green", value);
   root.style.setProperty("--accent-dim", color.dim);
   root.style.setProperty("--accent-green-dim", color.dim);
+}
+
+export function applyThemeMode(theme: ThemeMode, root: HTMLElement | null = typeof document !== "undefined" ? document.documentElement : null) {
+  if (!root) return;
+  const resolved = resolveTheme(theme);
+  root.dataset.themeMode = theme;
+  root.dataset.theme = resolved;
+  root.style.colorScheme = resolved;
+}
+
+export function applySettingsToDocument(settings: Settings, root: HTMLElement | null = typeof document !== "undefined" ? document.documentElement : null) {
+  if (!root) return;
+  applyThemeMode(settings.theme, root);
+  applyAccentColor(settings.accentColor, root);
+}
+
+function persistSettings(settings: Settings) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  window.dispatchEvent(new CustomEvent(SETTINGS_EVENT, { detail: settings }));
 }
 
 export function useSettings() {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed: Settings = { ...DEFAULTS, ...JSON.parse(stored) };
-        setSettings(parsed);
-        if (parsed.accentColor) applyAccentColor(parsed.accentColor);
-      }
-    } catch {}
+    const parsed = readStoredSettings();
+    setSettings(parsed);
+    applySettingsToDocument(parsed);
   }, []);
 
   const updateSettings = (partial: Partial<Settings>) => {
     const updated = { ...settings, ...partial };
     setSettings(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    if (partial.accentColor) applyAccentColor(partial.accentColor);
+    persistSettings(updated);
+    applySettingsToDocument(updated);
   };
 
   const resetSettings = () => {
-    setSettings(DEFAULTS);
-    localStorage.removeItem(STORAGE_KEY);
-    applyAccentColor(DEFAULTS.accentColor);
+    const next = getDefaultSettings();
+    setSettings(next);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(STORAGE_KEY);
+      window.dispatchEvent(new CustomEvent(SETTINGS_EVENT, { detail: next }));
+    }
+    applySettingsToDocument(next);
   };
 
   return { settings, updateSettings, resetSettings };
