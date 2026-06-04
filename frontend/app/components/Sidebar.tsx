@@ -7,19 +7,14 @@ import {
   Calendar,
   Upload,
   PlusCircle,
-  Settings,
   Wallet,
   ChevronDown,
   FileDown,
-  User,
-  LogOut,
   X,
 } from "lucide-react";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { type ComponentType, useState } from "react";
-
-import { useCurrentUserQuery, useLogoutMutation } from "@/lib/api/auth";
 
 import { useApp } from "../context/AppContext";
 import type { Account, PageId } from "../lib/types";
@@ -49,10 +44,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const { activePage, setActivePage, accounts, activeAccount, setActiveAccount } = useApp();
   const [showAccountMenu, setShowAccountMenu] = useState(false);
-  const pathname = usePathname();
   const router = useRouter();
-  const currentUserQuery = useCurrentUserQuery();
-  const logoutMutation = useLogoutMutation();
 
   const navigate = (page?: PageId, route?: string) => {
     if (page) {
@@ -63,17 +55,6 @@ export default function Sidebar({
     }
     onCloseMobile?.();
   };
-
-  async function handleLogout() {
-    try {
-      await logoutMutation.mutateAsync();
-    } catch {
-      // Best-effort logout.
-    }
-    onCloseMobile?.();
-    router.replace("/login");
-    router.refresh();
-  }
 
   return (
     <aside
@@ -348,77 +329,6 @@ export default function Sidebar({
         >
           <PlusCircle size={15} />
           Add Trade
-        </button>
-      </div>
-
-      <div style={{ padding: "16px 12px 0", borderTop: "1px solid var(--border)" }}>
-        <div style={{ padding: "0 12px 12px", color: "var(--text-muted)", fontSize: "11px", lineHeight: 1.5 }}>
-          <div style={{ color: "var(--text-primary)", fontWeight: 600 }}>{currentUserQuery.data?.full_name || "Account"}</div>
-          <div>{currentUserQuery.data?.email || ""}</div>
-        </div>
-        <button
-          onClick={() => navigate(undefined, "/profile")}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 12px",
-            borderRadius: "8px",
-            border: "none",
-            background: pathname === "/profile" ? "var(--accent-green-dim)" : "transparent",
-            color: pathname === "/profile" ? "var(--accent-green)" : "var(--text-muted)",
-            fontSize: "13px",
-            fontFamily: "inherit",
-            cursor: "pointer",
-            fontWeight: pathname === "/profile" ? "600" : "400",
-          }}
-        >
-          <User size={15} />
-          Profile
-        </button>
-        <button
-          onClick={() => navigate("settings")}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 12px",
-            borderRadius: "8px",
-            border: "none",
-            background: activePage === "settings" ? "var(--accent-green-dim)" : "transparent",
-            color: activePage === "settings" ? "var(--accent-green)" : "var(--text-muted)",
-            fontSize: "13px",
-            fontFamily: "inherit",
-            cursor: "pointer",
-            fontWeight: activePage === "settings" ? "600" : "400",
-          }}
-        >
-          <Settings size={15} />
-          Settings
-        </button>
-        <button
-          onClick={() => void handleLogout()}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 12px",
-            borderRadius: "8px",
-            border: "none",
-            background: "transparent",
-            color: "var(--accent-red)",
-            fontSize: "13px",
-            fontFamily: "inherit",
-            cursor: "pointer",
-            fontWeight: "400",
-            marginTop: "4px",
-          }}
-        >
-          <LogOut size={15} />
-          {logoutMutation.isPending ? "Signing out..." : "Logout"}
         </button>
       </div>
     </aside>

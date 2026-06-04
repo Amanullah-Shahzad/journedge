@@ -21,9 +21,11 @@ import {
   Clock3,
   Gauge,
   LineChart,
+  LogOut,
   Menu,
   Monitor,
   Moon,
+  Settings,
   Scale,
   ShieldCheck,
   Sun,
@@ -32,12 +34,14 @@ import {
   TrendingUp,
   Trophy,
   Upload,
+  User,
 } from "lucide-react";
 
 import { useAnalyticsSummaryQuery } from "@/lib/api/analytics";
-import { useCurrentUserQuery } from "@/lib/api/auth";
+import { useCurrentUserQuery, useLogoutMutation } from "@/lib/api/auth";
 import { useCalendarMonthQuery } from "@/lib/api/calendar";
 import type { AnalyticsPoint, Trade } from "@/lib/api/types";
+import { useRouter } from "next/navigation";
 import { useApp } from "../context/AppContext";
 import { useSettings } from "../hooks/useSettings";
 import { useResponsive } from "../hooks/useResponsive";
@@ -376,10 +380,13 @@ export default function Dashboard({
 }) {
   const { trades, activeAccount, setActivePage, setSelectedTrade } = useApp();
   const { isMobile, isTablet } = useResponsive();
+  const router = useRouter();
   const currentUserQuery = useCurrentUserQuery();
+  const logoutMutation = useLogoutMutation();
   const { settings, updateSettings } = useSettings();
   const analyticsSummaryQuery = useAnalyticsSummaryQuery(activeAccount?.id ?? null);
   const [granularity, setGranularity] = useState<ChartGranularity>("daily");
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const monthTarget = useMemo(() => getMostRecentTradeMonth(trades), [trades]);
   const calendarMonthQuery = useCalendarMonthQuery(monthTarget.year, monthTarget.month, activeAccount?.id ?? null);
@@ -574,6 +581,17 @@ export default function Dashboard({
   );
   const pnlChartNegative = (dashboardData?.cumulativePnl ?? 0) < 0;
 
+  async function handleLogout() {
+    try {
+      await logoutMutation.mutateAsync();
+    } catch {
+      // Best-effort logout.
+    }
+    setShowUserMenu(false);
+    router.replace("/login");
+    router.refresh();
+  }
+
   if (trades.length === 0) {
     return <EmptyDashboard onAddTrade={onAddTrade} onImport={() => setActivePage("import")} />;
   }
@@ -720,40 +738,135 @@ export default function Dashboard({
           >
             <ThemeIcon size={15} />
           </button>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "4px 6px 4px 4px",
-              borderRadius: "999px",
-              border: "1px solid var(--border)",
-              background: "var(--bg-card)",
-            }}
-          >
-            <div
+          <div style={{ position: "relative" }}>
+            <button
+              type="button"
+              onClick={() => setShowUserMenu((value) => !value)}
               style={{
-                width: 28,
-                height: 28,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "4px 6px 4px 4px",
                 borderRadius: "999px",
-                background: "linear-gradient(135deg, var(--accent-green), color-mix(in srgb, var(--accent-green) 35%, #4d9fff))",
-                color: "#04110a",
-                display: "grid",
-                placeItems: "center",
-                fontSize: "11px",
-                fontWeight: 800,
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+                cursor: "pointer",
               }}
             >
-              {getInitials(currentUserQuery.data?.full_name || currentUserQuery.data?.email)}
-            </div>
-            {!isMobile ? (
-              <div style={{ minWidth: 0 }}>
-                <div style={{ color: "var(--text-primary)", fontSize: "12px", fontWeight: 700, lineHeight: 1.2, maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {currentUserQuery.data?.full_name || "Trader"}
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "999px",
+                  background: "linear-gradient(135deg, var(--accent-green), color-mix(in srgb, var(--accent-green) 35%, #4d9fff))",
+                  color: "#04110a",
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: "11px",
+                  fontWeight: 800,
+                }}
+              >
+                {getInitials(currentUserQuery.data?.full_name || currentUserQuery.data?.email)}
+              </div>
+              {!isMobile ? (
+                <div style={{ minWidth: 0, textAlign: "left" }}>
+                  <div style={{ color: "var(--text-primary)", fontSize: "12px", fontWeight: 700, lineHeight: 1.2, maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {currentUserQuery.data?.full_name || "Trader"}
+                  </div>
+                  <div style={{ color: "var(--text-muted)", fontSize: "11px", lineHeight: 1.2 }}>
+                    {activeAccount?.name || "All accounts"}
+                  </div>
                 </div>
-                <div style={{ color: "var(--text-muted)", fontSize: "11px", lineHeight: 1.2 }}>
-                  {activeAccount?.name || "All accounts"}
-                </div>
+              ) : null}
+            </button>
+            {showUserMenu ? (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 8px)",
+                  right: 0,
+                  minWidth: isMobile ? "180px" : "200px",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "12px",
+                  boxShadow: "0 18px 40px rgba(0,0,0,0.12)",
+                  padding: "8px",
+                  zIndex: 30,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    router.push("/profile");
+                  }}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 12px",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: "transparent",
+                    color: "var(--text-primary)",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <User size={15} />
+                  Profile
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    setActivePage("settings");
+                  }}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 12px",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: "transparent",
+                    color: "var(--text-primary)",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <Settings size={15} />
+                  Settings
+                </button>
+                <div style={{ height: 1, background: "var(--border)", margin: "6px 0" }} />
+                <button
+                  type="button"
+                  onClick={() => void handleLogout()}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 12px",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: "transparent",
+                    color: "#ff4d6a",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <LogOut size={15} />
+                  {logoutMutation.isPending ? "Signing out..." : "Logout"}
+                </button>
               </div>
             ) : null}
           </div>
