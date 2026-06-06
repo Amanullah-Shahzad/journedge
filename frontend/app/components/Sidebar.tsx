@@ -10,7 +10,7 @@ import {
   Wallet,
   ChevronDown,
   FileDown,
-  X,
+  PanelLeftClose,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -97,9 +97,45 @@ export default function Sidebar({
         {isMobile ? (
           <button
             onClick={onCloseMobile}
-            style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 4 }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 42,
+              height: 42,
+              borderRadius: 14,
+              border: "1px solid color-mix(in srgb, var(--accent-green) 20%, var(--border))",
+              background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 92%, white 8%), var(--bg-card))",
+              color: "var(--text-primary)",
+              cursor: "pointer",
+              boxShadow: "0 12px 24px rgba(0,0,0,0.10)",
+              transition: "transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease",
+            }}
+            onMouseEnter={(event) => {
+              event.currentTarget.style.transform = "translateY(-1px)";
+              event.currentTarget.style.boxShadow = "0 16px 30px rgba(0,0,0,0.14)";
+              event.currentTarget.style.borderColor = "color-mix(in srgb, var(--accent-green) 38%, var(--border))";
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.transform = "translateY(0)";
+              event.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.10)";
+              event.currentTarget.style.borderColor = "color-mix(in srgb, var(--accent-green) 20%, var(--border))";
+            }}
+            aria-label="Close sidebar menu"
+            title="Close menu"
           >
-            <X size={18} />
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 8,
+                background: "color-mix(in srgb, var(--accent-green) 16%, transparent)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <PanelLeftClose size={16} />
+            </div>
           </button>
         ) : null}
       </div>

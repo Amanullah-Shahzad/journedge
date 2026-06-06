@@ -186,16 +186,7 @@ export default function ImportPage() {
   const cardsGrid = isMobile ? "1fr" : "1fr 1fr";
 
   return (
-    <div>
-      <div style={{ marginBottom: "32px" }}>
-        <h2 style={{ fontSize: "26px", fontWeight: "700", color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
-          Import Trades
-        </h2>
-        <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
-          {activeAccount ? `Importing into: ${activeAccount.name} (${activeAccount.broker})` : "No account selected - trades will be unlinked"}
-        </p>
-      </div>
-
+    <div style={{ paddingTop: "10px", marginTop: "6px" }}>
       <div style={{ display: "grid", gridTemplateColumns: cardsGrid, gap: "12px", marginBottom: "24px" }}>
         {BROKER_CARDS.map((card) => (
           <div

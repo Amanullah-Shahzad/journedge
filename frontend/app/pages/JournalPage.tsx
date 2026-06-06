@@ -419,20 +419,7 @@ export default function JournalPage() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div style={{ marginBottom: "24px" }}>
-        <h2 style={{
-          fontSize: "28px", fontWeight: "800", color: "var(--text-primary)",
-          letterSpacing: "-0.5px", marginBottom: "4px",
-        }}>
-          Journal
-        </h2>
-        <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>
-          Review every trade. Build your edge.
-        </p>
-      </div>
-
+    <div style={{ paddingTop: "10px", marginTop: "6px" }}>
       {/* Stats strip */}
       <div style={{
         display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(4, 1fr)",

@@ -465,15 +465,7 @@ export default function AnalyticsPage() {
     : "#8888aa";
 
   return (
-    <div>
-      <div style={{ marginBottom: "24px" }}>
-        <h2 style={{ fontSize: "28px", fontWeight: "800", color: "var(--text-primary)", letterSpacing: "-0.5px", marginBottom: "4px" }}>
-          Analytics
-        </h2>
-        <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>
-          {trades.length} trades · {stats.tradingDays} trading days
-        </p>
-      </div>
+    <div style={{ paddingTop: "10px", marginTop: "6px" }}>
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: "4px", marginBottom: "24px", background: "var(--bg-card)", borderRadius: "10px", padding: "4px", border: "1px solid var(--border)", width: "fit-content", flexWrap: "wrap" }}>

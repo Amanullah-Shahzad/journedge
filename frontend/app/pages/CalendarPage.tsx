@@ -145,15 +145,9 @@ export default function CalendarPage() {
   };
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", marginBottom: "24px", gap: "16px", flexWrap: "wrap" }}>
-        <div>
-          <h2 style={{ fontSize: "26px", fontWeight: "700", color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
-            Calendar
-          </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>Your trading performance at a glance</p>
-        </div>
-        <div style={{ display: "flex", alignItems: isMobile ? "stretch" : "center", gap: "16px", flexWrap: "wrap", width: isMobile ? "100%" : "auto" }}>
+    <div style={{ paddingTop: "10px", marginTop: "6px" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: isMobile ? "stretch" : "center", marginBottom: "24px", gap: "16px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: isMobile ? "stretch" : "center", gap: "16px", flexWrap: "wrap", width: isMobile ? "100%" : "auto", marginLeft: "auto", justifyContent: isMobile ? "stretch" : "flex-end" }}>
           <div style={{ display: "flex", gap: "12px", flex: isMobile ? "1 1 100%" : undefined, flexWrap: "wrap" }}>
             <div
               style={{

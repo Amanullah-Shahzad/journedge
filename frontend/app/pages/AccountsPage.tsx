@@ -87,16 +87,8 @@ export default function AccountsPage() {
   const cardsGrid = isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(3, 1fr)";
 
   return (
-    <div>
+    <div style={{ paddingTop: "10px", marginTop: "6px" }}>
       <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "flex-start", gap: "16px", flexWrap: "wrap" }}>
-        <div>
-          <h2 style={{ fontSize: "26px", fontWeight: "700", color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
-            Accounts
-          </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
-            Manage your trading accounts and track equity per account
-          </p>
-        </div>
         {accounts.length > 0 && (
           <button
             onClick={() => setShowForm(!showForm)}

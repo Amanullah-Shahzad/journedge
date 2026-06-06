@@ -15,38 +15,28 @@ import {
 } from "recharts";
 import {
   ArrowRight,
-  Bell,
   CalendarDays,
   CircleDollarSign,
   Clock3,
   Gauge,
   LineChart,
-  LogOut,
-  Menu,
-  Monitor,
-  Moon,
-  Settings,
   Scale,
   ShieldCheck,
-  Sun,
   Target,
   TrendingDown,
   TrendingUp,
   Trophy,
   Upload,
-  User,
 } from "lucide-react";
 
 import { useAnalyticsSummaryQuery } from "@/lib/api/analytics";
-import { useCurrentUserQuery, useLogoutMutation } from "@/lib/api/auth";
 import { useCalendarMonthQuery } from "@/lib/api/calendar";
 import type { AnalyticsPoint, Trade } from "@/lib/api/types";
-import { useRouter } from "next/navigation";
 import { useApp } from "../context/AppContext";
-import { useSettings } from "../hooks/useSettings";
 import { useResponsive } from "../hooks/useResponsive";
 
 type ChartGranularity = "daily" | "weekly" | "monthly";
+type DashboardRange = "7d" | "30d" | "90d" | "month" | "all";
 
 type KPIConfig = {
   title: string;
@@ -201,13 +191,6 @@ function getTone(value: number): "positive" | "negative" | "neutral" {
   return "neutral";
 }
 
-function getInitials(value?: string | null) {
-  if (!value) return "J";
-  const parts = value.trim().split(/\s+/).filter(Boolean).slice(0, 2);
-  if (parts.length === 0) return "J";
-  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "J";
-}
-
 function Section({
   title,
   subtitle,
@@ -277,7 +260,7 @@ function KpiCard({ title, value, icon: Icon, tone }: KPIConfig) {
     >
       <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" }}>
         <div>
-          <div style={{ color: "var(--text-primary)", fontSize: "15px", fontWeight: 700, lineHeight: 1.2 }}>
+          <div style={{ color: "var(--text-muted)", fontSize: "12px", fontWeight: 400, lineHeight: 1.45 }}>
             {title}
           </div>
           <div className="num-tabular" style={{ marginTop: "12px", lineHeight: 1, color: toneColor, fontSize: "18px", fontWeight: 800, letterSpacing: "-0.04em" }}>
@@ -373,20 +356,14 @@ function EmptyDashboard({ onAddTrade, onImport }: { onAddTrade: () => void; onIm
 
 export default function Dashboard({
   onAddTrade,
-  onOpenMenu,
 }: {
   onAddTrade: () => void;
-  onOpenMenu?: () => void;
 }) {
   const { trades, activeAccount, setActivePage, setSelectedTrade } = useApp();
   const { isMobile, isTablet } = useResponsive();
-  const router = useRouter();
-  const currentUserQuery = useCurrentUserQuery();
-  const logoutMutation = useLogoutMutation();
-  const { settings, updateSettings } = useSettings();
   const analyticsSummaryQuery = useAnalyticsSummaryQuery(activeAccount?.id ?? null);
   const [granularity, setGranularity] = useState<ChartGranularity>("daily");
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [selectedRange, setSelectedRange] = useState<DashboardRange>("30d");
 
   const monthTarget = useMemo(() => getMostRecentTradeMonth(trades), [trades]);
   const calendarMonthQuery = useCalendarMonthQuery(monthTarget.year, monthTarget.month, activeAccount?.id ?? null);
@@ -396,8 +373,7 @@ export default function Dashboard({
   const lowerGrid = isMobile ? "1fr" : isTablet ? "1fr 1fr" : "1.15fr 1fr";
   const summaryGrid = isMobile ? "1fr" : "1fr 1fr";
   const statsGrid = isMobile ? "1fr" : "1fr 1fr";
-  const themeIcon = settings.theme === "light" ? Sun : settings.theme === "dark" ? Moon : Monitor;
-  const ThemeIcon = themeIcon;
+  const rangeSelectWidth = isMobile ? "100%" : "170px";
 
   const dashboardData = useMemo(() => {
     const analytics = analyticsSummaryQuery.data;
@@ -581,17 +557,6 @@ export default function Dashboard({
   );
   const pnlChartNegative = (dashboardData?.cumulativePnl ?? 0) < 0;
 
-  async function handleLogout() {
-    try {
-      await logoutMutation.mutateAsync();
-    } catch {
-      // Best-effort logout.
-    }
-    setShowUserMenu(false);
-    router.replace("/login");
-    router.refresh();
-  }
-
   if (trades.length === 0) {
     return <EmptyDashboard onAddTrade={onAddTrade} onImport={() => setActivePage("import")} />;
   }
@@ -611,53 +576,24 @@ export default function Dashboard({
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          justifyContent: "flex-end",
+          alignItems: isMobile ? "stretch" : "center",
           gap: "12px",
           flexWrap: "wrap",
-          padding: isMobile ? "0" : "2px 0",
+          padding: "10px 0 2px",
+          marginTop: "6px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-          {isMobile ? (
-            <button
-              onClick={onOpenMenu}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                border: "1px solid var(--border)",
-                background: "var(--bg-card)",
-                color: "var(--text-muted)",
-                cursor: "pointer",
-              }}
-            >
-              <Menu size={16} />
-            </button>
-          ) : null}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "8px 10px",
-              borderRadius: "10px",
-              border: "1px solid var(--border)",
-              background: "var(--bg-card)",
-              color: "var(--text-secondary)",
-              fontSize: "12px",
-              fontWeight: 600,
-            }}
-          >
-            <CalendarDays size={14} />
-            <span>Last 30 days</span>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", justifyContent: isMobile ? "space-between" : "flex-end", width: isMobile ? "100%" : "auto" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: isMobile ? "flex-start" : "flex-end",
+            width: isMobile ? "100%" : "auto",
+          }}
+        >
           <button
             onClick={() => setActivePage("analytics")}
             style={{
@@ -694,182 +630,6 @@ export default function Dashboard({
           >
             Add Trade
           </button>
-          <button
-            style={{
-              position: "relative",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 36,
-              height: 36,
-              borderRadius: "10px",
-              border: "1px solid var(--border)",
-              background: "var(--bg-card)",
-              color: "var(--text-muted)",
-              cursor: "pointer",
-            }}
-          >
-            <Bell size={15} />
-            <span style={{ position: "absolute", top: 9, right: 9, width: 7, height: 7, borderRadius: 999, background: "var(--accent-green)" }} />
-          </button>
-          <button
-            onClick={() =>
-              updateSettings({
-                theme:
-                  settings.theme === "light"
-                    ? "dark"
-                    : settings.theme === "dark"
-                    ? "system"
-                    : "light",
-              })
-            }
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 36,
-              height: 36,
-              borderRadius: "10px",
-              border: "1px solid var(--border)",
-              background: "var(--bg-card)",
-              color: "var(--text-muted)",
-              cursor: "pointer",
-            }}
-          >
-            <ThemeIcon size={15} />
-          </button>
-          <div style={{ position: "relative" }}>
-            <button
-              type="button"
-              onClick={() => setShowUserMenu((value) => !value)}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "4px 6px 4px 4px",
-                borderRadius: "999px",
-                border: "1px solid var(--border)",
-                background: "var(--bg-card)",
-                cursor: "pointer",
-              }}
-            >
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "999px",
-                  background: "linear-gradient(135deg, var(--accent-green), color-mix(in srgb, var(--accent-green) 35%, #4d9fff))",
-                  color: "#04110a",
-                  display: "grid",
-                  placeItems: "center",
-                  fontSize: "11px",
-                  fontWeight: 800,
-                }}
-              >
-                {getInitials(currentUserQuery.data?.full_name || currentUserQuery.data?.email)}
-              </div>
-              {!isMobile ? (
-                <div style={{ minWidth: 0, textAlign: "left" }}>
-                  <div style={{ color: "var(--text-primary)", fontSize: "12px", fontWeight: 700, lineHeight: 1.2, maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {currentUserQuery.data?.full_name || "Trader"}
-                  </div>
-                  <div style={{ color: "var(--text-muted)", fontSize: "11px", lineHeight: 1.2 }}>
-                    {activeAccount?.name || "All accounts"}
-                  </div>
-                </div>
-              ) : null}
-            </button>
-            {showUserMenu ? (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "calc(100% + 8px)",
-                  right: 0,
-                  minWidth: isMobile ? "180px" : "200px",
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "12px",
-                  boxShadow: "0 18px 40px rgba(0,0,0,0.12)",
-                  padding: "8px",
-                  zIndex: 30,
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    router.push("/profile");
-                  }}
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 12px",
-                    borderRadius: "10px",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--text-primary)",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <User size={15} />
-                  Profile
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    setActivePage("settings");
-                  }}
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 12px",
-                    borderRadius: "10px",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--text-primary)",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <Settings size={15} />
-                  Settings
-                </button>
-                <div style={{ height: 1, background: "var(--border)", margin: "6px 0" }} />
-                <button
-                  type="button"
-                  onClick={() => void handleLogout()}
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 12px",
-                    borderRadius: "10px",
-                    border: "none",
-                    background: "transparent",
-                    color: "#ff4d6a",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <LogOut size={15} />
-                  {logoutMutation.isPending ? "Signing out..." : "Logout"}
-                </button>
-              </div>
-            ) : null}
-          </div>
         </div>
       </div>
 

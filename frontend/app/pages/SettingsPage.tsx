@@ -162,16 +162,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <>
-      <div style={{ marginBottom: "32px" }}>
-        <h2 style={{ fontSize: "26px", fontWeight: "700", color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
-          Settings
-        </h2>
-        <p style={{ color: "var(--text-muted)", fontSize: "14px", marginTop: "4px" }}>
-          Preferences are saved locally to your device
-        </p>
-      </div>
-
+    <div style={{ paddingTop: "10px", marginTop: "6px" }}>
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "16px", alignItems: "start" }}>
         <div>
           <Section title="Appearance" icon={Palette}>
@@ -356,6 +347,6 @@ export default function SettingsPage() {
           </Section>
         </div>
       </div>
-    </>
+    </div>
   );
 }
