@@ -8,6 +8,7 @@ import { useResponsive } from "../hooks/useResponsive";
 import { Palette, Sliders, Database, Check, FileDown } from "lucide-react";
 
 const ACCENT_COLORS = [
+  { label: "Sky", value: "#7ab8ff", dim: "rgba(122,184,255,0.16)" },
   { label: "Green", value: "#00e57a", dim: "rgba(0,229,122,0.12)" },
   { label: "Blue", value: "#4d9fff", dim: "rgba(77,159,255,0.12)" },
   { label: "Purple", value: "#a78bfa", dim: "rgba(167,139,250,0.12)" },

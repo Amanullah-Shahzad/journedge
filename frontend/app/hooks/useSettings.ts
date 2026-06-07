@@ -12,8 +12,8 @@ export interface Settings {
 }
 
 const DEFAULTS: Settings = {
-  theme: "system",
-  accentColor: "#00e57a",
+  theme: "light",
+  accentColor: "#7ab8ff",
   defaultMultiplier: 100,
   defaultCommission: 0,
   defaultFees: 0,
@@ -24,6 +24,7 @@ export const STORAGE_KEY = "journedge_settings";
 export const SETTINGS_EVENT = "journedge:settings-updated";
 
 const COLOR_MAP: Record<string, { dim: string }> = {
+  "#7ab8ff": { dim: "rgba(122,184,255,0.16)" },
   "#00e57a": { dim: "rgba(0,229,122,0.12)" },
   "#4d9fff": { dim: "rgba(77,159,255,0.12)" },
   "#a78bfa": { dim: "rgba(167,139,250,0.12)" },

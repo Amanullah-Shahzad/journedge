@@ -33,17 +33,18 @@ export default function RootLayout({
             try {
               var s = localStorage.getItem('journedge_settings');
               var root = document.documentElement;
-              var themeMode = 'system';
+              var themeMode = 'light';
               if (s) {
                 var settings = JSON.parse(s);
                 var colorMap = {
+                  '#7ab8ff': 'rgba(122,184,255,0.16)',
                   '#00e57a': 'rgba(0,229,122,0.12)',
                   '#4d9fff': 'rgba(77,159,255,0.12)',
                   '#a78bfa': 'rgba(167,139,250,0.12)',
                   '#fb923c': 'rgba(251,146,60,0.12)',
                   '#f472b6': 'rgba(244,114,182,0.12)',
                 };
-                themeMode = settings.theme || 'system';
+                themeMode = settings.theme || 'light';
                 var accent = settings.accentColor;
                 if (accent && colorMap[accent]) {
                   root.style.setProperty('--accent-green', accent);
