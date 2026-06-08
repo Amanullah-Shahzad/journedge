@@ -55,7 +55,7 @@ function AppShell() {
 
         {!isEditorPage ? (
           <div style={{ textAlign: "center", marginTop: "48px", color: "var(--text-muted)", fontSize: "12px" }}>
-            Journedge SaaS workspace
+            AsaanJournal workspace
           </div>
         ) : null}
       </main>

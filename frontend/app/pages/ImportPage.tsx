@@ -22,7 +22,7 @@ type ParseStatus = "idle" | "success" | "error" | "importing";
 type BrokerSource = "journedge" | "fidelity" | "tdameritrade" | "tastytrade" | "ibkr";
 
 const BADGE_CONFIG: Record<BrokerSource, { label: string; color: string; bg: string; border: string }> = {
-  journedge: { label: "Journedge Export", color: "#00e57a", bg: "rgba(0,229,122,0.12)", border: "rgba(0,229,122,0.3)" },
+  journedge: { label: "AsaanJournal Export", color: "#00e57a", bg: "rgba(0,229,122,0.12)", border: "rgba(0,229,122,0.3)" },
   fidelity: { label: "Fidelity CSV", color: "#4d9fff", bg: "rgba(77,159,255,0.12)", border: "rgba(77,159,255,0.3)" },
   tdameritrade: { label: "TD Ameritrade CSV", color: "#fb923c", bg: "rgba(251,146,60,0.12)", border: "rgba(251,146,60,0.3)" },
   tastytrade: { label: "Tastytrade CSV", color: "#a78bfa", bg: "rgba(167,139,250,0.12)", border: "rgba(167,139,250,0.3)" },
@@ -31,8 +31,8 @@ const BADGE_CONFIG: Record<BrokerSource, { label: string; color: string; bg: str
 
 const BROKER_CARDS = [
   {
-    label: "Journedge Export",
-    desc: "Re-import a CSV you previously exported from Journedge. All journal notes, tags, and trade data are preserved.",
+    label: "AsaanJournal Export",
+    desc: "Re-import a CSV you previously exported from AsaanJournal. All journal notes, tags, and trade data are preserved.",
     color: "#00e57a",
     bg: "rgba(0,229,122,0.06)",
     border: "rgba(0,229,122,0.2)",
@@ -145,7 +145,7 @@ export default function ImportPage() {
       if (preview.validRows === 0) {
         setStatus("error");
         setMessage(
-          "No valid trades found. Make sure this is a supported broker export or a Journedge CSV. Supported: Fidelity, TD Ameritrade, Tastytrade, Interactive Brokers, Journedge.",
+          "No valid trades found. Make sure this is a supported broker export or an AsaanJournal CSV. Supported: Fidelity, TD Ameritrade, Tastytrade, Interactive Brokers, AsaanJournal.",
         );
         return;
       }
@@ -154,7 +154,7 @@ export default function ImportPage() {
       setMessage(`Found ${preview.validRows} trade${preview.validRows !== 1 ? "s" : ""} ready to import.`);
     } catch {
       setStatus("error");
-      setMessage("Could not parse this file. Check it is a valid broker or Journedge CSV.");
+      setMessage("Could not parse this file. Check it is a valid broker or AsaanJournal CSV.");
     }
   };
 

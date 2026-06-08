@@ -277,7 +277,7 @@ export default function TradingReportPDF({ trades, account, dateRange, logoUrl, 
             <View style={styles.coverBrand}>
               {logoUrl
                 ? <Image src={logoUrl} style={{ width: 210, height: 44 }} />
-                : <Text style={styles.brandWordmark}>journedge</Text>
+                : <Text style={styles.brandWordmark}>asaanjournal</Text>
               }
               <Text style={styles.brandSub}>Trading Performance Report</Text>
             </View>
@@ -368,7 +368,7 @@ export default function TradingReportPDF({ trades, account, dateRange, logoUrl, 
         )}
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>Journedge — Trading Performance Report</Text>
+          <Text style={styles.footerText}>AsaanJournal — Trading Performance Report</Text>
           <Text style={styles.footerText}>{generatedDate}</Text>
         </View>
       </Page>
@@ -416,7 +416,7 @@ export default function TradingReportPDF({ trades, account, dateRange, logoUrl, 
           ))}
 
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>Journedge — Trading Performance Report</Text>
+            <Text style={styles.footerText}>AsaanJournal — Trading Performance Report</Text>
             <Text
               style={styles.footerText}
               render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
@@ -472,7 +472,7 @@ export default function TradingReportPDF({ trades, account, dateRange, logoUrl, 
             })}
 
             <View style={styles.footer} fixed>
-              <Text style={styles.footerText}>Journedge — Trading Performance Report</Text>
+              <Text style={styles.footerText}>AsaanJournal — Trading Performance Report</Text>
               <Text
                 style={styles.footerText}
                 render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}

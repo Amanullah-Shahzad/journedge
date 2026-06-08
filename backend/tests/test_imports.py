@@ -4,7 +4,17 @@ CSV = """Date,Symbol,Underlying,Type,Direction,Option Type,Strike,Expiry,Quantit
 
 
 def register(client):
-    response = client.post("/api/auth/register", json={"email": "importer@example.com", "password": "StrongPass123", "full_name": "Importer"})
+    response = client.post(
+        "/api/auth/register",
+        json={
+            "email": "importer@example.com",
+            "password": "StrongPass123",
+            "full_name": "Importer",
+            "trading_experience": "Intermediate",
+            "preferred_market": "Futures",
+            "country": "United States",
+        },
+    )
     assert response.status_code == 200
 
 

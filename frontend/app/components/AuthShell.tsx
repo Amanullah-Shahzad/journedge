@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Lock } from "lucide-react";
+import BrandLogo from "./BrandLogo";
 
 export function AuthShell({
   title,
@@ -29,25 +30,7 @@ export function AuthShell({
       <div style={{ width: "min(1180px, calc(100% - 32px))", margin: "0 auto", padding: "24px 0 36px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap", marginBottom: 26 }}>
           <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 12, color: "inherit", textDecoration: "none" }}>
-            <div
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: 14,
-                display: "grid",
-                placeItems: "center",
-                background: "linear-gradient(135deg, var(--accent-green), color-mix(in srgb, var(--accent-green) 44%, #4d9fff))",
-                color: "#02130b",
-                fontWeight: 900,
-                boxShadow: "0 18px 30px rgba(0,229,122,0.18)",
-              }}
-            >
-              J
-            </div>
-            <div>
-              <div style={{ color: "var(--text-primary)", fontSize: 18, fontWeight: 800, letterSpacing: "-0.03em" }}>Journedge</div>
-              <div style={{ color: "var(--text-muted)", fontSize: 11 }}>Trading journal</div>
-            </div>
+            <BrandLogo variant="full" width={196} height={40} alt="AsaanJournal" priority />
           </Link>
 
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 999, background: "color-mix(in srgb, var(--bg-card) 88%, transparent)", border: "1px solid var(--border)", color: "var(--text-secondary)", fontSize: 12, fontWeight: 700 }}>

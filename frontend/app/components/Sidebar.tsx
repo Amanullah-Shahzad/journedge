@@ -12,12 +12,12 @@ import {
   FileDown,
   PanelLeftClose,
 } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type ComponentType, useState } from "react";
 
 import { useApp } from "../context/AppContext";
 import type { Account, PageId } from "../lib/types";
+import BrandLogo from "./BrandLogo";
 
 const NAV_ITEMS: Array<{ icon: ComponentType<{ size?: number }>; label: string; id: PageId }> = [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
@@ -88,9 +88,9 @@ export default function Sidebar({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
-          <Image src="/icon.svg" alt="Journedge" width={34} height={34} priority />
+          <BrandLogo variant="icon" alt="AsaanJournal" iconSize={34} priority />
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: "19px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.4px" }}>Journedge</div>
+            <div style={{ fontSize: "19px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.4px" }}>AsaanJournal</div>
             <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Trading workspace</div>
           </div>
         </div>

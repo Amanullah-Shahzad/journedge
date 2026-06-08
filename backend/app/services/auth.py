@@ -14,10 +14,25 @@ def get_user_by_email(db: Session, email: str) -> User | None:
     return db.scalar(select(User).where(User.email == email.lower().strip()))
 
 
-def register_user(db: Session, email: str, password: str, full_name: str | None = None) -> tuple[User, str]:
+def register_user(
+    db: Session,
+    email: str,
+    password: str,
+    full_name: str | None = None,
+    trading_experience: str | None = None,
+    preferred_market: str | None = None,
+    country: str | None = None,
+) -> tuple[User, str]:
     if get_user_by_email(db, email):
         raise AppError("Email already registered", status_code=409, code="email_taken")
-    user = User(email=email.lower().strip(), password_hash=hash_password(password), full_name=full_name)
+    user = User(
+        email=email.lower().strip(),
+        password_hash=hash_password(password),
+        full_name=full_name,
+        trading_experience=trading_experience,
+        preferred_market=preferred_market,
+        country=country,
+    )
     db.add(user)
     db.flush()
 

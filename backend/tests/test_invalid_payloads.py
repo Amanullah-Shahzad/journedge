@@ -1,5 +1,15 @@
 def register(client):
-    response = client.post("/api/auth/register", json={"email": "validator@example.com", "password": "StrongPass123", "full_name": "Validator"})
+    response = client.post(
+        "/api/auth/register",
+        json={
+            "email": "validator@example.com",
+            "password": "StrongPass123",
+            "full_name": "Validator",
+            "trading_experience": "Intermediate",
+            "preferred_market": "Forex",
+            "country": "United States",
+        },
+    )
     assert response.status_code == 200
 
 
@@ -12,7 +22,16 @@ def assert_validation_error(response):
 
 
 def test_invalid_auth_payload(client):
-    response = client.post("/api/auth/register", json={"email": "bad@example.com", "password": "short"})
+    response = client.post(
+        "/api/auth/register",
+        json={
+            "email": "bad@example.com",
+            "password": "short",
+            "trading_experience": "Intermediate",
+            "preferred_market": "Forex",
+            "country": "United States",
+        },
+    )
     assert_validation_error(response)
 
 

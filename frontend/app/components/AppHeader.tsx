@@ -56,7 +56,7 @@ export default function AppHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const { settings, updateSettings } = useSettings();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const title = PAGE_TITLES[activePage] ?? "Journedge";
+  const title = PAGE_TITLES[activePage] ?? "AsaanJournal";
   const themeIcon = settings.theme === "light" ? Sun : settings.theme === "dark" ? Moon : Monitor;
   const ThemeIcon = themeIcon;
   const accountLabel = useMemo(() => activeAccount?.name || "All accounts", [activeAccount]);

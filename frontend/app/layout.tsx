@@ -11,12 +11,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Journedge",
+  title: "AsaanJournal",
   description: "The open source trading journal built for serious traders.",
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/asaanjournal-icon.svg",
+    shortcut: "/asaanjournal-icon.svg",
+    apple: "/asaanjournal-icon.svg",
   },
 };
 

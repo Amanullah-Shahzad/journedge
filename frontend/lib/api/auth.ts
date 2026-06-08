@@ -13,6 +13,9 @@ interface LoginInput {
 
 interface RegisterInput extends LoginInput {
   full_name?: string;
+  trading_experience: string;
+  preferred_market: string;
+  country: string;
 }
 
 interface ForgotPasswordInput {

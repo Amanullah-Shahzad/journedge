@@ -1,6 +1,6 @@
-# Journedge
+# AsaanJournal
 
-Journedge is a trading journal monorepo. The active split architecture is:
+AsaanJournal is a trading journal monorepo. The active split architecture is:
 
 - `frontend/`: `Next.js` + `React` + `TypeScript`
 - `backend/`: `FastAPI` + `SQLAlchemy` + `Alembic`
@@ -11,7 +11,7 @@ The repository also still contains the older root-level app files from the origi
 
 ## Project Overview
 
-Journedge is built for traders who want to:
+AsaanJournal is built for traders who want to:
 
 - create and manage trading accounts
 - import broker CSVs with duplicate-safe ingestion

@@ -44,7 +44,7 @@ export default function LoginPage() {
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Sign in to access your Journedge workspace, review your trades, and continue improving your process."
+      subtitle="Sign in to access your AsaanJournal workspace, review your trades, and continue improving your process."
       footer={
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", fontSize: 13 }}>
           <Link href="/register" style={{ color: "var(--accent-green)", textDecoration: "none", fontWeight: 700 }}>

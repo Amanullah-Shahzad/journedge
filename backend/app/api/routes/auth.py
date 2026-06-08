@@ -37,7 +37,15 @@ def set_session_cookie(response: Response, token: str) -> None:
 @router.post("/register", response_model=AuthResponse)
 @limiter.limit("10/minute")
 def register(payload: RegisterRequest, request: Request, response: Response, db: Session = Depends(get_db)) -> AuthResponse:
-    user, _verify_token = register_user(db, payload.email, payload.password, payload.full_name)
+    user, _verify_token = register_user(
+        db,
+        payload.email,
+        payload.password,
+        payload.full_name,
+        payload.trading_experience,
+        payload.preferred_market,
+        payload.country,
+    )
     token = login_user(db, payload.email, payload.password, request.client.host if request.client else None, request.headers.get("user-agent"))[1]
     set_session_cookie(response, token)
     log_event(

@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import TextType from "./components/TextType";
+import BrandLogo from "./components/BrandLogo";
 
 type FeatureCard = {
   icon: React.ComponentType<{ size?: number; color?: string }>;
@@ -58,7 +59,7 @@ const FEATURES: FeatureCard[] = [
 ];
 
 const HOW_IT_WORKS = [
-  { step: "01", title: "Create account", body: "Open your Journedge account and set up your trading workspace." },
+  { step: "01", title: "Create account", body: "Open your AsaanJournal account and set up your trading workspace." },
   { step: "02", title: "Import or add trades", body: "Upload CSV exports or log trades manually when you want more control." },
   { step: "03", title: "Add notes, screenshots, and tags", body: "Document setups, emotional mistakes, and execution context trade by trade." },
   { step: "04", title: "Review analytics and improve", body: "Use dashboards, analytics, and calendar views to refine your edge." },
@@ -66,12 +67,12 @@ const HOW_IT_WORKS = [
 
 const FAQS = [
   {
-    q: "What is Journedge?",
-    a: "Journedge is a trading journal built for importing trades, adding notes and screenshots, and reviewing analytics in one workspace.",
+    q: "What is AsaanJournal?",
+    a: "AsaanJournal is a trading journal built for importing trades, adding notes and screenshots, and reviewing analytics in one workspace.",
   },
   {
     q: "Can I import CSV files?",
-    a: "Yes. Journedge supports CSV import workflows so you can bring broker trade history into your journal quickly.",
+    a: "Yes. AsaanJournal supports CSV import workflows so you can bring broker trade history into your journal quickly.",
   },
   {
     q: "Can I add screenshots?",
@@ -83,7 +84,7 @@ const FAQS = [
   },
   {
     q: "Does it support analytics?",
-    a: "Yes. Journedge includes performance analytics such as P&L, win rate, profit factor, R:R context, and calendar review.",
+    a: "Yes. AsaanJournal includes performance analytics such as P&L, win rate, profit factor, R:R context, and calendar review.",
   },
 ];
 
@@ -154,27 +155,9 @@ function LandingNavbar() {
           gap: 16,
         }}
       >
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 12, color: "inherit", textDecoration: "none" }}>
-          <div
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 14,
-              display: "grid",
-              placeItems: "center",
-              background: "linear-gradient(135deg, var(--accent-green), color-mix(in srgb, var(--accent-green) 44%, #4d9fff))",
-              color: "#02130b",
-              fontWeight: 900,
-              boxShadow: "0 18px 30px rgba(0,229,122,0.18)",
-            }}
-          >
-            J
-          </div>
-          <div>
-            <div style={{ color: "var(--text-primary)", fontSize: 18, fontWeight: 800, letterSpacing: "-0.03em" }}>Journedge</div>
-            <div style={{ color: "var(--text-muted)", fontSize: 11 }}>Trading journal workspace</div>
-          </div>
-        </Link>
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 12, color: "inherit", textDecoration: "none" }}>
+            <BrandLogo variant="full" forceTheme="dark" width={186} height={38} alt="AsaanJournal" priority />
+          </Link>
 
         <nav style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div className="landing-nav-links" style={{ display: "none", alignItems: "center", gap: 4 }}>
@@ -275,9 +258,10 @@ function HeroMockup() {
   return (
     <Surface
       style={{
-        padding: 20,
+        padding: 18,
         position: "relative",
         overflow: "hidden",
+        marginTop: "-18px",
       }}
     >
       <div
@@ -303,98 +287,31 @@ function HeroMockup() {
         }}
       />
 
-      <div style={{ display: "grid", gap: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-          <div>
-            <div style={{ color: "var(--text-primary)", fontSize: 18, fontWeight: 800 }}>Performance Snapshot</div>
-            <div style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 4 }}>Live journal-style view of your trading process</div>
-          </div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 999, background: "color-mix(in srgb, var(--accent-green) 14%, transparent)", color: "var(--accent-green)", fontSize: 12, fontWeight: 700 }}>
-            <Sparkles size={14} />
-            Structured journaling
-          </div>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-          <StatChip label="Net P&L" value="+$12.8K" tone="positive" />
-          <StatChip label="Win Rate" value="62.4%" tone="neutral" />
-          <StatChip label="Profit Factor" value="1.94" tone="positive" />
-          <StatChip label="Avg R:R" value="2.36R" tone="neutral" />
-        </div>
-
-        <Surface style={{ padding: 16, borderRadius: 20, background: "color-mix(in srgb, var(--bg-secondary) 74%, transparent)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
-            <div>
-              <div style={{ color: "var(--text-primary)", fontSize: 15, fontWeight: 700 }}>Equity Curve</div>
-              <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 4 }}>Journal, import, review, refine</div>
-            </div>
-            <div style={{ color: "var(--accent-green)", fontSize: 13, fontWeight: 700 }}>+18.4%</div>
-          </div>
-          <div
-            style={{
-              height: 180,
-              borderRadius: 18,
-              background:
-                "linear-gradient(180deg, rgba(0,229,122,0.12) 0%, rgba(0,229,122,0.02) 70%), linear-gradient(135deg, color-mix(in srgb, var(--bg-card) 72%, transparent), color-mix(in srgb, var(--bg-secondary) 86%, transparent))",
-              border: "1px solid color-mix(in srgb, var(--accent-green) 16%, var(--border))",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ position: "absolute", inset: "18px 18px auto 18px", display: "grid", gap: 10 }}>
-              {[48, 64, 72, 58, 80].map((width, index) => (
-                <div key={index} style={{ height: 1, background: "color-mix(in srgb, var(--border) 80%, transparent)", width: "100%" }} />
-              ))}
-            </div>
-            <svg viewBox="0 0 440 180" preserveAspectRatio="none" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-              <defs>
-                <linearGradient id="lineGlow" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#00e57a" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#00e57a" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path d="M0,145 C40,138 60,122 88,116 C116,110 136,96 164,88 C192,80 210,108 240,94 C270,80 292,60 320,54 C348,48 376,38 440,26 L440,180 L0,180 Z" fill="url(#lineGlow)" />
-              <path d="M0,145 C40,138 60,122 88,116 C116,110 136,96 164,88 C192,80 210,108 240,94 C270,80 292,60 320,54 C348,48 376,38 440,26" fill="none" stroke="#00e57a" strokeWidth="4" strokeLinecap="round" />
-            </svg>
-          </div>
-        </Surface>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 12 }}>
-          <Surface style={{ padding: 16, borderRadius: 20 }}>
-            <div style={{ color: "var(--text-primary)", fontSize: 15, fontWeight: 700 }}>Recent Journal Notes</div>
-            <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
-              {[
-                "Held winners longer when setup matched playbook.",
-                "Tagged revenge trades after back-to-back losses.",
-                "Screenshot review shows early exits on trend days.",
-              ].map((text) => (
-                <div key={text} style={{ padding: "12px 14px", borderRadius: 16, background: "var(--bg-secondary)", color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.55 }}>
-                  {text}
-                </div>
-              ))}
-            </div>
-          </Surface>
-          <Surface style={{ padding: 16, borderRadius: 20 }}>
-            <div style={{ color: "var(--text-primary)", fontSize: 15, fontWeight: 700 }}>Top Symbols</div>
-            <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
-              {[
-                { symbol: "BTC/USD", pnl: "+$5.4K", width: 92, tone: "#00e57a" },
-                { symbol: "XAU/USD", pnl: "+$2.1K", width: 68, tone: "#00e57a" },
-                { symbol: "EUR/USD", pnl: "-$480", width: 34, tone: "#ff4d6a" },
-              ].map((item) => (
-                <div key={item.symbol}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13 }}>
-                    <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{item.symbol}</span>
-                    <span className="num-tabular" style={{ color: item.tone, fontWeight: 800 }}>{item.pnl}</span>
-                  </div>
-                  <div style={{ height: 8, borderRadius: 999, background: "var(--bg-secondary)", marginTop: 8, overflow: "hidden" }}>
-                    <div style={{ width: `${item.width}%`, height: "100%", borderRadius: 999, background: item.tone }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Surface>
-        </div>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          borderRadius: 24,
+          overflow: "hidden",
+          border: "1px solid color-mix(in srgb, var(--accent-green) 18%, var(--border))",
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 88%, transparent), var(--bg-card))",
+          boxShadow: "0 26px 60px rgba(0,0,0,0.12)",
+        }}
+      >
+        <Image
+          src="/project.gif"
+          alt="AsaanJournal product preview"
+          width={1600}
+          height={960}
+          priority
+          unoptimized
+          style={{
+            display: "block",
+            width: "100%",
+            height: "auto",
+            objectFit: "cover",
+          }}
+        />
       </div>
     </Surface>
   );
@@ -422,7 +339,22 @@ export default function LandingPage() {
   const year = useMemo(() => new Date().getFullYear(), []);
 
   return (
-    <div style={{ background: "var(--bg-primary)", color: "var(--text-primary)" }}>
+    <div
+      style={{
+        "--bg-primary": "#0a0a0f",
+        "--bg-secondary": "#111118",
+        "--bg-card": "#16161f",
+        "--bg-hover": "#1e1e2a",
+        "--border": "#2a2a3a",
+        "--text-primary": "#f0f0ff",
+        "--text-secondary": "#a0abc3",
+        "--text-muted": "#7b86a0",
+        "--shadow-soft": "0 24px 64px rgba(0, 0, 0, 0.35)",
+        "--overlay": "rgba(0, 0, 0, 0.6)",
+        background: "var(--bg-primary)",
+        color: "var(--text-primary)",
+      } as React.CSSProperties}
+    >
       <style>{`
         @media (min-width: 960px) {
           .landing-nav-links, .landing-nav-cta { display: inline-flex !important; }
@@ -481,7 +413,7 @@ export default function LandingPage() {
                   <ShieldCheck size={14} />
                   Modern trading journal
                 </div>
-                <h1 style={{ marginTop: 20, color: "var(--text-primary)", fontSize: "clamp(42px, 6.8vw, 74px)", lineHeight: 0.96, letterSpacing: "-0.065em", fontWeight: 900, maxWidth: 700, minHeight: "2.2em" }}>
+                <h1 style={{ marginTop: 20, color: "var(--text-primary)", fontSize: "clamp(34px, 5.6vw, 60px)", lineHeight: 0.98, letterSpacing: "-0.06em", fontWeight: 900, maxWidth: 700, minHeight: "2.2em" }}>
                   <TextType
                     text="Journal every trade. Learn from every mistake."
                     typingSpeed={62}
@@ -492,7 +424,7 @@ export default function LandingPage() {
                   />
                 </h1>
                 <p style={{ marginTop: 18, maxWidth: 620, color: "var(--text-secondary)", fontSize: "clamp(16px, 1.8vw, 19px)", lineHeight: 1.75 }}>
-                  Journedge helps you import trades, capture screenshots, write notes, tag patterns, review analytics, and study your calendar history in one trading journal workspace.
+                  AsaanJournal helps you import trades, capture screenshots, write notes, tag patterns, review analytics, and study your calendar history in one trading journal workspace.
                 </p>
 
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 28 }}>
@@ -564,7 +496,7 @@ export default function LandingPage() {
           <SectionHeading
             eyebrow="Features"
             title="Everything you need to review your trades with structure."
-            body="Journedge keeps your imports, notes, screenshots, tags, analytics, and account context connected so the review process stays simple."
+            body="AsaanJournal keeps your imports, notes, screenshots, tags, analytics, and account context connected so the review process stays simple."
           />
           <div className="landing-feature-grid" style={{ display: "grid", gap: 16 }}>
             {FEATURES.map(({ icon: Icon, title, body }) => (
@@ -617,6 +549,8 @@ export default function LandingPage() {
                     border: "1px solid color-mix(in srgb, var(--accent-green) 18%, var(--border))",
                     background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 86%, transparent), var(--bg-card))",
                     boxShadow: "0 24px 60px rgba(0,0,0,0.10)",
+                    minHeight: 360,
+                    height: "100%",
                   }}
                 >
                   <div
@@ -632,7 +566,7 @@ export default function LandingPage() {
                   />
                   <Image
                     src="/Dashboard_Screen.png"
-                    alt="Journedge dashboard overview"
+                    alt="AsaanJournal dashboard overview"
                     width={1600}
                     height={980}
                     priority
@@ -640,16 +574,18 @@ export default function LandingPage() {
                     style={{
                       display: "block",
                       width: "100%",
-                      height: "auto",
+                      height: "100%",
                       position: "relative",
                       zIndex: 2,
+                      objectFit: "cover",
+                      objectPosition: "top center",
                     }}
                   />
                 </div>
               </div>
             </Surface>
 
-            <div style={{ display: "grid", gap: 16 }}>
+            <div style={{ display: "grid" }}>
               <Surface style={{ padding: 18, borderRadius: 24 }}>
                 <div>
                   <div style={{ color: "var(--text-primary)", fontSize: 16, fontWeight: 800 }}>Trade Review Workspace</div>
@@ -663,22 +599,18 @@ export default function LandingPage() {
                     border: "1px solid color-mix(in srgb, var(--accent-green) 18%, var(--border))",
                     background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 86%, transparent), var(--bg-card))",
                     boxShadow: "0 20px 44px rgba(0,0,0,0.10)",
+                    minHeight: 360,
                   }}
                 >
                   <Image
                     src="/Dashboard_Screenshot_1.png"
-                    alt="Journedge trade journal and dashboard detail"
+                    alt="AsaanJournal trade journal and dashboard detail"
                     width={1400}
                     height={900}
                     unoptimized
-                    style={{ display: "block", width: "100%", height: "auto" }}
+                    style={{ display: "block", width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }}
                   />
                 </div>
-              </Surface>
-
-              <Surface style={{ padding: 18, borderRadius: 24, minHeight: 0 }}>
-                <div style={{ color: "var(--text-primary)", fontSize: 16, fontWeight: 800 }}>Focused review surfaces</div>
-                <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 4 }}>Dashboard, journal context, and clean performance visibility in one flow.</div>
               </Surface>
             </div>
           </div>
@@ -688,14 +620,14 @@ export default function LandingPage() {
           <SectionHeading
             eyebrow="Analytics"
             title="Performance insights that connect numbers back to behavior."
-            body="Journedge is designed to help you connect the story behind the trade with the result on the chart and the statistic in the report."
+            body="AsaanJournal is designed to help you connect the story behind the trade with the result on the chart and the statistic in the report."
           />
           <div className="landing-analytics-grid" style={{ display: "grid", gap: 16 }}>
             <Surface style={{ padding: 20, borderRadius: 24 }}>
               <div style={{ display: "grid", gap: 14 }}>
                 <div>
                   <div style={{ color: "var(--text-primary)", fontSize: 16, fontWeight: 800 }}>Analytics Overview</div>
-                  <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 4 }}>A polished look at the reporting and review layer inside Journedge.</div>
+                  <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 4 }}>A polished look at the reporting and review layer inside AsaanJournal.</div>
                 </div>
                 <div
                   style={{
@@ -708,7 +640,7 @@ export default function LandingPage() {
                 >
                   <Image
                     src="/Analytics_screenshot.png"
-                    alt="Journedge analytics page"
+                    alt="AsaanJournal analytics page"
                     width={1600}
                     height={980}
                     unoptimized
@@ -833,11 +765,9 @@ export default function LandingPage() {
         <div className="landing-footer-grid" style={{ width: "min(1180px, calc(100% - 32px))", margin: "0 auto", padding: "32px 0 42px", display: "grid", gap: 18 }}>
           <div>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 12, display: "grid", placeItems: "center", background: "linear-gradient(135deg, var(--accent-green), color-mix(in srgb, var(--accent-green) 44%, #4d9fff))", color: "#02130b", fontWeight: 900 }}>
-                J
-              </div>
+              <BrandLogo variant="icon" alt="AsaanJournal" iconSize={36} />
               <div>
-                <div style={{ color: "var(--text-primary)", fontSize: 16, fontWeight: 800 }}>Journedge</div>
+                <div style={{ color: "var(--text-primary)", fontSize: 16, fontWeight: 800 }}>AsaanJournal</div>
                 <div style={{ color: "var(--text-muted)", fontSize: 12 }}>Trading journal for serious review</div>
               </div>
             </div>
@@ -863,7 +793,7 @@ export default function LandingPage() {
             <div style={{ display: "grid", gap: 8 }}>
               <a href="#" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 14 }}>Privacy</a>
               <a href="#" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 14 }}>Terms</a>
-              <span style={{ color: "var(--text-muted)", fontSize: 13 }}>© {year} Journedge</span>
+              <span style={{ color: "var(--text-muted)", fontSize: 13 }}>© {year} AsaanJournal</span>
             </div>
           </div>
         </div>

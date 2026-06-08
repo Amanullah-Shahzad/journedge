@@ -252,7 +252,7 @@ function LivePreview({
                 fontSize: "9px", fontWeight: "800", color: "#00e57a",
               }}>T</div>
               <span style={{ fontSize: "11px", fontWeight: "800", color: "#0a0a1a", letterSpacing: "-0.3px" }}>
-                journedge
+                asaanjournal
               </span>
             </div>
             <div style={{ fontSize: "8px", color: "#888" }}>Trading Performance Report</div>
@@ -381,7 +381,7 @@ export default function ExportPage() {
   const set = <K extends keyof ReportOptions>(key: K, val: ReportOptions[K]) =>
     setOptions((prev) => ({ ...prev, [key]: val }));
 
-  const filename = `journedge-report-${
+  const filename = `asaanjournal-report-${
     activeAccount?.name?.toLowerCase().replace(/\s+/g, "-") || "account"
   }-${new Date().toISOString().split("T")[0]}.pdf`;
 

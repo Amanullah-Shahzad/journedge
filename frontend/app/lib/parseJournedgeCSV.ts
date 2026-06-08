@@ -36,7 +36,7 @@ function normalizeDate(raw: string): string {
 
 export function parseJournedgeCSV(csvText: string): Trade[] {
   const lines = csvText.split("\n").map((l) => l.trim()).filter(Boolean);
-  if (lines.length < 2) throw new Error("Empty Journedge CSV");
+  if (lines.length < 2) throw new Error("Empty AsaanJournal CSV");
 
   const trades: Trade[] = [];
 

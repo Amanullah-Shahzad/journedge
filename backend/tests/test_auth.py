@@ -1,7 +1,14 @@
 def test_register_login_and_me(client):
     register = client.post(
         "/api/auth/register",
-        json={"email": "alice@example.com", "password": "StrongPass123", "full_name": "Alice"},
+        json={
+            "email": "alice@example.com",
+            "password": "StrongPass123",
+            "full_name": "Alice",
+            "trading_experience": "Intermediate",
+            "preferred_market": "Forex",
+            "country": "United States",
+        },
     )
     assert register.status_code == 200
     body = register.json()
@@ -24,7 +31,14 @@ def test_register_login_and_me(client):
 def test_versioned_me_endpoint(client):
     register = client.post(
         "/api/auth/register",
-        json={"email": "versioned@example.com", "password": "StrongPass123", "full_name": "Versioned"},
+        json={
+            "email": "versioned@example.com",
+            "password": "StrongPass123",
+            "full_name": "Versioned",
+            "trading_experience": "Intermediate",
+            "preferred_market": "Forex",
+            "country": "United States",
+        },
     )
     assert register.status_code == 200
     me = client.get("/api/v1/users/me")

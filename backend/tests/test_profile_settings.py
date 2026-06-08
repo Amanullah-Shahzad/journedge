@@ -1,5 +1,15 @@
 def register(client, email: str = "profile@example.com", password: str = "StrongPass123"):
-    response = client.post("/api/auth/register", json={"email": email, "password": password, "full_name": "Profile User"})
+    response = client.post(
+        "/api/auth/register",
+        json={
+            "email": email,
+            "password": password,
+            "full_name": "Profile User",
+            "trading_experience": "Intermediate",
+            "preferred_market": "Stocks",
+            "country": "United States",
+        },
+    )
     assert response.status_code == 200
     return response
 

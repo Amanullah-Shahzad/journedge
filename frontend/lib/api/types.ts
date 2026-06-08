@@ -54,6 +54,9 @@ export interface AuthUser {
   id: string;
   email: string;
   full_name?: string | null;
+  trading_experience?: string | null;
+  preferred_market?: string | null;
+  country?: string | null;
   role: string;
   is_verified: boolean;
   is_active: boolean;
