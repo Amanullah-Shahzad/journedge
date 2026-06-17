@@ -22,6 +22,7 @@ import { useResponsive } from "../hooks/useResponsive";
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: "Dashboard",
+  trades: "Trades",
   journal: "Journal",
   "journal-editor": "Journal Editor",
   analytics: "Analytics",
@@ -34,6 +35,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 const PAGE_SUBTITLES: Partial<Record<string, string>> = {
   dashboard: "Your performance pulse at a glance",
+  trades: "Browse your trade gallery with screenshots, notes, and outcomes",
   journal: "Review every trade. Build your edge.",
   calendar: "Your trading performance at a glance",
   accounts: "Manage your trading accounts and track equity per account",

@@ -18,6 +18,7 @@ import ImportPage from "../pages/ImportPage";
 import JournalEditorPage from "../pages/JournalEditorPage";
 import JournalPage from "../pages/JournalPage";
 import SettingsPage from "../pages/SettingsPage";
+import TradesPage from "../pages/TradesPage";
 
 function AppShell() {
   const { activePage, selectedTrade, setSelectedTrade } = useApp();
@@ -44,6 +45,7 @@ function AppShell() {
         {!isEditorPage ? <AppHeader onOpenMenu={() => setSidebarOpen(true)} /> : null}
 
         {activePage === "dashboard" && <Dashboard onAddTrade={() => setShowAddTrade(true)} />}
+        {activePage === "trades" && <TradesPage />}
         {activePage === "journal" && <JournalPage />}
         {activePage === "journal-editor" && <JournalEditorPage />}
         {activePage === "analytics" && <AnalyticsPage />}

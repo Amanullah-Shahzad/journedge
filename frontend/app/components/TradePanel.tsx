@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useUploadScreenshotMutation } from "@/lib/api/screenshots";
 import { useUpdateTradeMutation } from "@/lib/api/trades";
 
+import AuthenticatedImage from "./AuthenticatedImage";
 import { useApp } from "../context/AppContext";
 import { useResponsive } from "../hooks/useResponsive";
 import type { Trade } from "../lib/types";
@@ -326,7 +327,7 @@ export default function TradePanel({ trade, onClose }: Props) {
               <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "8px", marginBottom: "8px" }}>
                 {images.map((url) => (
                   <div key={url} style={{ position: "relative", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)" }}>
-                    <img src={url} alt="screenshot" style={{ width: "100%", height: "110px", objectFit: "cover", display: "block" }} />
+                    <AuthenticatedImage src={url} alt="screenshot" style={{ width: "100%", height: "110px", objectFit: "cover", display: "block" }} />
                     <button
                       onClick={() => removeImage(url)}
                       style={{

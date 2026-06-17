@@ -2,6 +2,7 @@
 
 import {
   LayoutDashboard,
+  GalleryVerticalEnd,
   BookOpen,
   BarChart2,
   Calendar,
@@ -21,6 +22,7 @@ import BrandLogo from "./BrandLogo";
 
 const NAV_ITEMS: Array<{ icon: ComponentType<{ size?: number }>; label: string; id: PageId }> = [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
+  { icon: GalleryVerticalEnd, label: "Trades", id: "trades" },
   { icon: BookOpen, label: "Journal", id: "journal" },
   { icon: BarChart2, label: "Analytics", id: "analytics" },
   { icon: Calendar, label: "Calendar", id: "calendar" },
