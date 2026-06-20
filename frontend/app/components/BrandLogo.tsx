@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 type BrandLogoProps = {
   variant?: "full" | "icon";
@@ -25,46 +26,50 @@ export default function BrandLogo({
     return <Image src="/asaanjournal-icon.svg" alt={alt} width={iconSize} height={iconSize} priority={priority} />;
   }
 
-  const resolvedTheme = forceTheme ?? "system";
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(
+    forceTheme === "dark" ? "dark" : "light",
+  );
+
+  useEffect(() => {
+    if (forceTheme) {
+      setResolvedTheme(forceTheme);
+      return;
+    }
+
+    const root = document.documentElement;
+
+    const resolveTheme = () => {
+      const dataTheme = root.dataset.theme;
+      if (dataTheme === "dark" || dataTheme === "light") {
+        setResolvedTheme(dataTheme);
+        return;
+      }
+
+      setResolvedTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    };
+
+    resolveTheme();
+
+    const observer = new MutationObserver(resolveTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onMediaChange = () => resolveTheme();
+    media.addEventListener("change", onMediaChange);
+
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", onMediaChange);
+    };
+  }, [forceTheme]);
 
   return (
-    <>
-      <style>{`
-        .brand-logo-light,
-        .brand-logo-dark {
-          display: none;
-        }
-
-        .brand-logo-light.brand-logo-force-light,
-        .brand-logo-dark.brand-logo-force-dark {
-          display: block;
-        }
-
-        html[data-theme="light"] .brand-logo-light.brand-logo-theme-system,
-        html:not([data-theme]) .brand-logo-light.brand-logo-theme-system {
-          display: block;
-        }
-
-        html[data-theme="dark"] .brand-logo-dark.brand-logo-theme-system {
-          display: block;
-        }
-      `}</style>
-      <Image
-        className={`brand-logo-light ${resolvedTheme === "light" ? "brand-logo-force-light" : resolvedTheme === "system" ? "brand-logo-theme-system" : ""}`}
-        src="/asaanjournal-logo-light.svg"
-        alt={alt}
-        width={width}
-        height={height}
-        priority={priority}
-      />
-      <Image
-        className={`brand-logo-dark ${resolvedTheme === "dark" ? "brand-logo-force-dark" : resolvedTheme === "system" ? "brand-logo-theme-system" : ""}`}
-        src="/asaanjournal-logo-dark.svg"
-        alt={alt}
-        width={width}
-        height={height}
-        priority={priority}
-      />
-    </>
+    <Image
+      src={resolvedTheme === "dark" ? "/asaanjournal-logo-dark.svg" : "/asaanjournal-logo-light.svg"}
+      alt={alt}
+      width={width}
+      height={height}
+      priority={priority}
+    />
   );
 }

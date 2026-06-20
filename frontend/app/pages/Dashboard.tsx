@@ -772,11 +772,17 @@ export default function Dashboard({
                     padding: isMobile ? "6px" : "8px",
                   }}
                 >
-                  <span className="num-tabular" style={{ color: "var(--text-primary)", fontSize: "var(--font-size-kpi-label)", fontWeight: 700 }}>
+                  <span
+                    className="num-tabular"
+                    style={{ color: "var(--text-primary)", fontSize: "var(--font-size-kpi-label)", fontWeight: 700 }}
+                  >
                     {Number(day.date.slice(-2))}
                   </span>
                   {day.count > 0 ? (
-                    <span className="num-tabular" style={{ color: day.pnl > 0 ? "#00e57a" : day.pnl < 0 ? "#ff4d6a" : "var(--text-secondary)", fontSize: "var(--font-size-chart)", fontWeight: 700 }}>
+                    <span
+                      className="num-tabular"
+                      style={{ color: day.pnl > 0 ? "#00e57a" : day.pnl < 0 ? "#ff4d6a" : "var(--text-secondary)", fontSize: "var(--font-size-chart)", fontWeight: 700 }}
+                    >
                       {isMobile ? day.count : formatCompactCurrency(day.pnl)}
                     </span>
                   ) : null}

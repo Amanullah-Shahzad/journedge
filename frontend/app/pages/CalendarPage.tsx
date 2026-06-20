@@ -32,6 +32,88 @@ const LOSS_BG = "rgba(255,77,106,0.07)";
 const WIN_BORDER = "rgba(0,229,122,0.25)";
 const LOSS_BORDER = "rgba(255,77,106,0.25)";
 
+function renderJournalPreview(raw: string | null | undefined, maxWords = 10): string {
+  if (!raw || raw.trim() === "") return "";
+
+  let text = raw;
+  try {
+    const doc = JSON.parse(raw);
+    if (doc?.type === "doc" && Array.isArray(doc.content)) {
+      text = doc.content
+        .flatMap((node: { content?: Array<{ type?: string; text?: string }> }) =>
+          Array.isArray(node.content) ? node.content.filter((item) => item.type === "text").map((item) => item.text || "") : [],
+        )
+        .join(" ")
+        .trim();
+    }
+  } catch {
+    text = raw;
+  }
+
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length <= maxWords) return words.join(" ");
+  return `${words.slice(0, maxWords).join(" ")}...`;
+}
+
+function KpiCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  tone?: "positive" | "negative" | "neutral";
+}) {
+  const color =
+    tone === "positive" ? WIN_COLOR : tone === "negative" ? LOSS_COLOR : "var(--text-primary)";
+
+  return (
+    <div
+      style={{
+        borderRadius: "14px",
+        border: "1px solid var(--border)",
+        background:
+          "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 92%, white 8%) 0%, var(--bg-card) 100%)",
+        padding: "14px",
+        minHeight: "102px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" }}>
+        <div>
+          <div style={{ color: "var(--text-muted)", fontSize: "12px", fontWeight: 400, lineHeight: 1.45 }}>
+            {label}
+          </div>
+          <div className="num-tabular" style={{ marginTop: "12px", lineHeight: 1, color, fontSize: "18px", fontWeight: 800, letterSpacing: "-0.04em" }}>
+            {value}
+          </div>
+          {sub ? <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "8px", lineHeight: 1.35 }}>{sub}</div> : null}
+        </div>
+        <div
+          style={{
+            width: "34px",
+            height: "34px",
+            borderRadius: "11px",
+            display: "grid",
+            placeItems: "center",
+            background: "var(--accent-green-dim)",
+            border: "1px solid color-mix(in srgb, var(--accent-green) 28%, transparent)",
+            flexShrink: 0,
+          }}
+        >
+          <Icon size={15} color="var(--accent-green)" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function normalizeDate(dateStr: string): string {
   if (!dateStr) return "";
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
@@ -50,6 +132,15 @@ export default function CalendarPage() {
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const hasSnapped = useRef(false);
+
+  useEffect(() => {
+    if (!selectedDay) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [selectedDay]);
 
   useEffect(() => {
     if (hasSnapped.current || trades.length === 0) return;
@@ -341,47 +432,33 @@ export default function CalendarPage() {
 
       {tradingDaysCount > 0 ? (
         <div style={{ marginTop: "24px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(4, 1fr)", gap: "16px" }}>
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "6px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Calendar size={14} color="var(--text-muted)" />
-              <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--text-muted)", letterSpacing: "0.5px" }}>TRADING DAYS</span>
-            </div>
-            <div style={{ fontSize: "28px", fontWeight: "800", color: "var(--text-primary)", letterSpacing: "-1px" }}>{tradingDaysCount}</div>
-            <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{monthWins.length}W · {monthLosses.length}L</div>
-          </div>
-
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "6px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <BarChart2 size={14} color="var(--text-muted)" />
-              <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--text-muted)", letterSpacing: "0.5px" }}>AVG DAILY P&L</span>
-            </div>
-            <div style={{ fontSize: "28px", fontWeight: "800", letterSpacing: "-1px", color: avgDailyPnl >= 0 ? WIN_COLOR : LOSS_COLOR }}>
-              {avgDailyPnl >= 0 ? "+" : ""}${avgDailyPnl.toFixed(2)}
-            </div>
-            <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>per trading day</div>
-          </div>
-
-          <div style={{ background: "var(--bg-card)", border: `1px solid ${WIN_BORDER}`, borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "6px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <TrendingUp size={14} color={WIN_COLOR} />
-              <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--text-muted)", letterSpacing: "0.5px" }}>BEST DAY</span>
-            </div>
-            <div style={{ fontSize: "28px", fontWeight: "800", color: WIN_COLOR, letterSpacing: "-1px" }}>
-              {bestDay ? `+$${bestDay[1].pnl.toFixed(2)}` : "-"}
-            </div>
-            <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{bestDay ? formatDisplayDate(bestDay[0]) : "No data"}</div>
-          </div>
-
-          <div style={{ background: "var(--bg-card)", border: `1px solid ${LOSS_BORDER}`, borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "6px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <TrendingDown size={14} color={LOSS_COLOR} />
-              <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--text-muted)", letterSpacing: "0.5px" }}>WORST DAY</span>
-            </div>
-            <div style={{ fontSize: "28px", fontWeight: "800", color: LOSS_COLOR, letterSpacing: "-1px" }}>
-              {worstDay ? `$${worstDay[1].pnl.toFixed(2)}` : "-"}
-            </div>
-            <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{worstDay ? formatDisplayDate(worstDay[0]) : "No data"}</div>
-          </div>
+          <KpiCard
+            label="TRADING DAYS"
+            value={String(tradingDaysCount)}
+            sub={`${monthWins.length}W · ${monthLosses.length}L`}
+            icon={Calendar}
+          />
+          <KpiCard
+            label="AVG DAILY P&L"
+            value={`${avgDailyPnl >= 0 ? "+" : ""}$${avgDailyPnl.toFixed(2)}`}
+            sub="per trading day"
+            icon={BarChart2}
+            tone={avgDailyPnl >= 0 ? "positive" : "negative"}
+          />
+          <KpiCard
+            label="BEST DAY"
+            value={bestDay ? `+$${bestDay[1].pnl.toFixed(2)}` : "-"}
+            sub={bestDay ? formatDisplayDate(bestDay[0]) : "No data"}
+            icon={TrendingUp}
+            tone="positive"
+          />
+          <KpiCard
+            label="WORST DAY"
+            value={worstDay ? `$${worstDay[1].pnl.toFixed(2)}` : "-"}
+            sub={worstDay ? formatDisplayDate(worstDay[0]) : "No data"}
+            icon={TrendingDown}
+            tone="negative"
+          />
         </div>
       ) : (
         <div style={{ marginTop: "24px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "14px", padding: "32px", textAlign: "center" }}>
@@ -391,7 +468,17 @@ export default function CalendarPage() {
 
       {selectedDay && selectedTrades.length > 0 && (
         <>
-          <div onClick={() => setSelectedDay(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 40 }} />
+          <div
+            onClick={() => setSelectedDay(null)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "color-mix(in srgb, var(--bg-primary) 80%, transparent)",
+              backdropFilter: "blur(3px)",
+              WebkitBackdropFilter: "blur(3px)",
+              zIndex: 40,
+            }}
+          />
           <div
             style={{
               position: "fixed",
@@ -440,70 +527,89 @@ export default function CalendarPage() {
               </button>
             </div>
 
-            <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "12px" }}>Click any trade to open the journal panel</p>
+            <div style={{ flex: 1, overflowY: "auto", padding: "18px", background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-primary) 68%, transparent) 0%, transparent 100%)" }}>
+              <p style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "14px", letterSpacing: "0.04em", textTransform: "uppercase" }}>Click any trade to open the journal panel</p>
               {selectedTrades.map((trade) => (
                 <div
                   key={trade.id}
                   onClick={() => handleTradeClick(trade)}
                   style={{
-                    background: "var(--bg-card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "12px",
+                    background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 96%, white 4%) 0%, var(--bg-card) 100%)",
+                    border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+                    borderRadius: "16px",
                     padding: "16px",
-                    marginBottom: "12px",
+                    marginBottom: "14px",
                     cursor: "pointer",
-                    transition: "all 0.15s ease",
+                    transition: "all 0.18s ease",
+                    boxShadow: "0 14px 32px rgba(15,23,42,0.08)",
                   }}
                   onMouseEnter={(event) => {
-                    event.currentTarget.style.borderColor = WIN_COLOR;
-                    event.currentTarget.style.transform = "translateY(-1px)";
+                    event.currentTarget.style.borderColor = "color-mix(in srgb, var(--accent-green) 32%, var(--border))";
+                    event.currentTarget.style.transform = "translateY(-2px)";
+                    event.currentTarget.style.boxShadow = "0 18px 36px rgba(15,23,42,0.12)";
                   }}
                   onMouseLeave={(event) => {
-                    event.currentTarget.style.borderColor = "var(--border)";
+                    event.currentTarget.style.borderColor = "color-mix(in srgb, var(--border) 88%, transparent)";
                     event.currentTarget.style.transform = "translateY(0)";
+                    event.currentTarget.style.boxShadow = "0 14px 32px rgba(15,23,42,0.08)";
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ fontSize: "16px", fontWeight: "800", color: "var(--text-primary)" }}>{trade.underlying}</span>
-                      <span
-                        style={{
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          fontSize: "10px",
-                          fontWeight: "600",
-                          background: trade.optionType === "call" ? "rgba(77,159,255,0.15)" : "rgba(255,77,106,0.15)",
-                          color: trade.optionType === "call" ? "var(--accent-blue)" : LOSS_COLOR,
-                        }}
-                      >
-                        {trade.optionType ? `${trade.optionType.toUpperCase()} $${trade.strike}` : trade.type.toUpperCase()}
-                      </span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "12px" }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "6px" }}>
+                        <span style={{ fontSize: "17px", fontWeight: "800", color: "var(--text-primary)", letterSpacing: "-0.03em" }}>{trade.underlying}</span>
+                        <span
+                          style={{
+                            padding: "4px 8px",
+                            borderRadius: "999px",
+                            fontSize: "10px",
+                            fontWeight: "700",
+                            background: trade.optionType === "call" ? "rgba(77,159,255,0.12)" : trade.optionType === "put" ? "rgba(255,77,106,0.12)" : "rgba(148,163,184,0.12)",
+                            color: trade.optionType === "call" ? "var(--accent-blue)" : trade.optionType === "put" ? LOSS_COLOR : "var(--text-secondary)",
+                            border: `1px solid ${trade.optionType === "call" ? "rgba(77,159,255,0.22)" : trade.optionType === "put" ? "rgba(255,77,106,0.22)" : "rgba(148,163,184,0.22)"}`,
+                          }}
+                        >
+                          {trade.optionType ? `${trade.optionType.toUpperCase()} $${trade.strike}` : trade.type.toUpperCase()}
+                        </span>
+                        <span
+                          style={{
+                            padding: "4px 8px",
+                            borderRadius: "999px",
+                            fontSize: "10px",
+                            fontWeight: "700",
+                            background: trade.direction === "short" ? "rgba(255,77,106,0.1)" : "rgba(0,229,122,0.1)",
+                            color: trade.direction === "short" ? LOSS_COLOR : WIN_COLOR,
+                            border: `1px solid ${trade.direction === "short" ? "rgba(255,77,106,0.2)" : "rgba(0,229,122,0.2)"}`,
+                          }}
+                        >
+                          {trade.direction?.toUpperCase() || "TRADE"}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", fontSize: "12px", color: "var(--text-muted)" }}>
+                        <span>Entry ${trade.entryPrice}</span>
+                        <span>Exit ${trade.exitPrice}</span>
+                        {trade.rr ? <span>R:R {trade.rr}</span> : null}
+                        {trade.entryTime ? <span>{trade.entryTime}</span> : null}
+                      </div>
                     </div>
-                    <span style={{ fontSize: "15px", fontWeight: "700", color: trade.pnl >= 0 ? WIN_COLOR : LOSS_COLOR }}>
+                    <span className="num-tabular" style={{ fontSize: "18px", fontWeight: "800", color: trade.pnl >= 0 ? WIN_COLOR : LOSS_COLOR, letterSpacing: "-0.03em", whiteSpace: "nowrap" }}>
                       {trade.pnl >= 0 ? "+" : ""}${trade.pnl}
                     </span>
                   </div>
 
-                  <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>Entry: ${trade.entryPrice}</span>
-                    <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>Exit: ${trade.exitPrice}</span>
-                    {trade.rr && <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>R:R {trade.rr}</span>}
-                    {trade.entryTime && <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{trade.entryTime}</span>}
-                  </div>
-
                   {(trade.tags || []).length > 0 && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "8px" }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
                       {(trade.tags || []).map((tag) => (
                         <span
                           key={tag}
                           style={{
-                            padding: "2px 6px",
-                            borderRadius: "4px",
+                            padding: "4px 8px",
+                            borderRadius: "999px",
                             fontSize: "10px",
-                            fontWeight: "600",
-                            background: "var(--accent-green-dim)",
+                            fontWeight: "700",
+                            background: "color-mix(in srgb, var(--accent-green) 12%, var(--bg-card))",
                             color: "var(--accent-green)",
+                            border: "1px solid color-mix(in srgb, var(--accent-green) 22%, transparent)",
                           }}
                         >
                           {tag}
@@ -516,18 +622,18 @@ export default function CalendarPage() {
                     <p
                       style={{
                         fontSize: "12px",
-                        color: "var(--text-muted)",
-                        lineHeight: "1.5",
-                        borderTop: "1px solid var(--border)",
-                        paddingTop: "8px",
-                        marginTop: "4px",
+                        color: "var(--text-secondary)",
+                        lineHeight: "1.6",
+                        borderTop: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+                        paddingTop: "10px",
+                        marginTop: "2px",
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical" as const,
                         overflow: "hidden",
                       }}
                     >
-                      {trade.journalEntry}
+                      {renderJournalPreview(trade.journalEntry, 10)}
                     </p>
                   )}
                 </div>

@@ -198,17 +198,44 @@ function MetricCard({
 }) {
   const color = neutral ? "var(--text-muted)" : positive ? "#00e57a" : "#ff4d6a";
   return (
-    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "12px", padding: "16px 18px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-        <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-          {label}
-        </span>
-        <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "var(--accent-green-dim)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div
+      style={{
+        borderRadius: "14px",
+        border: "1px solid var(--border)",
+        background:
+          "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 92%, white 8%) 0%, var(--bg-card) 100%)",
+        padding: "14px",
+        minHeight: "102px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" }}>
+        <div>
+          <div style={{ color: "var(--text-muted)", fontSize: "12px", fontWeight: 400, lineHeight: 1.45 }}>
+            {label}
+          </div>
+          <div className="num-tabular" style={{ marginTop: "12px", lineHeight: 1, color, fontSize: "18px", fontWeight: 800, letterSpacing: "-0.04em" }}>
+            {value}
+          </div>
+          {sub ? <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "8px", lineHeight: 1.35 }}>{sub}</div> : null}
+        </div>
+        <div
+          style={{
+            width: "34px",
+            height: "34px",
+            borderRadius: "11px",
+            display: "grid",
+            placeItems: "center",
+            background: "var(--accent-green-dim)",
+            border: "1px solid color-mix(in srgb, var(--accent-green) 28%, transparent)",
+            flexShrink: 0,
+          }}
+        >
           <Icon size={13} color="var(--accent-green)" />
         </div>
       </div>
-      <div style={{ fontSize: "22px", fontWeight: "800", color, lineHeight: 1 }}>{value}</div>
-      {sub && <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "5px" }}>{sub}</div>}
     </div>
   );
 }

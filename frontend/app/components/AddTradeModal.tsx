@@ -13,11 +13,11 @@ import TagSelector from "./TagSelector";
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px",
-  borderRadius: "8px",
-  border: "1px solid var(--border)",
+  borderRadius: "12px",
+  border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
   background: "var(--bg-secondary)",
   color: "var(--text-primary)",
-  fontSize: "16px",
+  fontSize: "14px",
   boxSizing: "border-box",
   outline: "none",
 };
@@ -31,12 +31,39 @@ const selectStyle: React.CSSProperties = {
 };
 
 const labelStyle: React.CSSProperties = {
-  fontSize: "12px",
-  color: "var(--text-secondary)",
-  fontWeight: "600",
+  fontSize: "10px",
+  color: "var(--text-muted)",
+  fontWeight: "700",
   display: "block",
   marginBottom: "6px",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
 };
+
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      style={{
+        background: "var(--bg-card)",
+        border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+        borderRadius: 18,
+        padding: 16,
+        boxShadow: "0 14px 32px rgba(15,23,42,0.08)",
+      }}
+    >
+      <div style={{ color: "var(--text-secondary)", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
+        {title}
+      </div>
+      {children}
+    </section>
+  );
+}
 
 function SelectWrap({ children }: { children: React.ReactNode }) {
   return (
@@ -124,6 +151,14 @@ export default function AddTradeModal({ onClose }: Props) {
   const [journalEntry, setJournalEntry] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   const livePnl =
     entryPrice && exitPrice && quantity
@@ -230,40 +265,44 @@ export default function AddTradeModal({ onClose }: Props) {
           left: "50%",
           bottom: isMobile ? 0 : "auto",
           transform: isMobile ? "translateX(-50%)" : "translate(-50%, -50%)",
-          width: isMobile ? "100vw" : "min(680px, 95vw)",
-          maxHeight: isMobile ? "92dvh" : "90vh",
+          width: isMobile ? "100vw" : "min(920px, 94vw)",
+          maxHeight: "90vh",
           background: "var(--bg-card)",
-          borderRadius: "20px",
+          borderRadius: "22px",
           borderBottomLeftRadius: isMobile ? 0 : 20,
           borderBottomRightRadius: isMobile ? 0 : 20,
-          border: "1px solid var(--border)",
+          border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
           zIndex: 201,
-          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          boxShadow: "0 30px 80px rgba(15,23,42,0.18)",
         }}
       >
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            padding: "20px 24px",
-            borderBottom: "1px solid var(--border)",
+            alignItems: "flex-start",
+            padding: "22px 24px 18px",
+            borderBottom: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
             position: "sticky",
             top: 0,
-            background: "var(--bg-card)",
-            zIndex: 1,
+            background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 96%, white 4%) 0%, color-mix(in srgb, var(--bg-secondary) 92%, transparent) 100%)",
+            zIndex: 2,
+            gap: 12,
           }}
         >
           <div>
-            <h2 style={{ fontSize: "17px", fontWeight: "700", color: "var(--text-primary)" }}>Add Trade</h2>
-            {activeAccount ? <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>Adding to: {activeAccount.name}</p> : null}
+            <h2 style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "-0.04em", color: "var(--text-primary)", lineHeight: 1.1 }}>Add Trade</h2>
+            {activeAccount ? <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "6px" }}>Adding to: {activeAccount.name}</p> : null}
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", borderRadius: "6px" }}>
+          <button onClick={onClose} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 4, borderRadius: 8, color: "var(--text-muted)" }}>
             <X size={18} color="var(--text-secondary)" />
           </button>
         </div>
 
-        <div style={{ padding: "24px" }}>
+        <div style={{ padding: "18px 20px 22px", display: "grid", gap: 16, overflowY: "auto", flex: 1 }}>
           {error ? (
             <div
               style={{
@@ -285,27 +324,23 @@ export default function AddTradeModal({ onClose }: Props) {
               style={{
                 background: livePnl >= 0 ? "rgba(0,229,122,0.08)" : "rgba(255,77,106,0.08)",
                 border: `1px solid ${livePnl >= 0 ? "var(--accent-green)" : "var(--accent-red)"}`,
-                borderRadius: "10px",
+                borderRadius: "14px",
                 padding: "12px 16px",
-                marginBottom: "20px",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 gap: "12px",
               }}
             >
-              <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Estimated P&amp;L</span>
-              <span style={{ fontSize: "20px", fontWeight: "700", color: livePnl >= 0 ? "var(--accent-green)" : "var(--accent-red)" }}>
+              <span style={{ fontSize: "13px", color: "var(--text-secondary)", fontWeight: 600 }}>Estimated P&amp;L</span>
+              <span className="num-tabular" style={{ fontSize: "20px", fontWeight: "800", color: livePnl >= 0 ? "var(--accent-green)" : "var(--accent-red)", letterSpacing: "-0.03em" }}>
                 {livePnl >= 0 ? "+" : ""}${livePnl.toFixed(2)}
               </span>
             </div>
           ) : null}
 
-          <p style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", marginBottom: "12px", letterSpacing: "0.5px" }}>
-            TRADE DETAILS
-          </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: baseGrid, gap: "14px", marginBottom: "20px" }}>
+          <SectionCard title="Trade Details">
+          <div style={{ display: "grid", gridTemplateColumns: baseGrid, gap: "14px" }}>
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={labelStyle}>Symbol</label>
               <input value={symbol} onChange={(event) => setSymbol(event.target.value)} placeholder="e.g. SPXW260220C6955 or AAPL or /ES" style={inputStyle} />
@@ -363,13 +398,11 @@ export default function AddTradeModal({ onClose }: Props) {
               <input value={rr} onChange={(event) => setRr(event.target.value)} placeholder="e.g. 1:2" style={inputStyle} />
             </div>
           </div>
+          </SectionCard>
 
           {type === "option" ? (
-            <>
-              <p style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", marginBottom: "12px", letterSpacing: "0.5px" }}>
-                OPTION DETAILS
-              </p>
-              <div style={{ display: "grid", gridTemplateColumns: optionGrid, gap: "14px", marginBottom: "20px" }}>
+            <SectionCard title="Option Details">
+              <div style={{ display: "grid", gridTemplateColumns: optionGrid, gap: "14px" }}>
                 <div>
                   <label style={labelStyle}>Option Type</label>
                   <SelectWrap>
@@ -388,40 +421,35 @@ export default function AddTradeModal({ onClose }: Props) {
                   <input value={expiry} onChange={(event) => setExpiry(event.target.value)} placeholder="YYYY-MM-DD" style={inputStyle} />
                 </div>
               </div>
-            </>
+            </SectionCard>
           ) : null}
 
-          <p style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", marginBottom: "12px", letterSpacing: "0.5px" }}>
-            EXECUTION QUALITY
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: baseGrid, gap: "14px", marginBottom: "20px" }}>
-            <div>
-              <label style={labelStyle}>MAE - worst move against you</label>
-              <input value={mae} onChange={(event) => setMae(event.target.value)} placeholder="e.g. 1.25" type="number" step="0.01" min="0" style={inputStyle} />
+          <SectionCard title="Execution Quality">
+            <div style={{ display: "grid", gridTemplateColumns: baseGrid, gap: "14px" }}>
+              <div>
+                <label style={labelStyle}>MAE - worst move against you</label>
+                <input value={mae} onChange={(event) => setMae(event.target.value)} placeholder="e.g. 1.25" type="number" step="0.01" min="0" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>MFE - best move in your favor</label>
+                <input value={mfe} onChange={(event) => setMfe(event.target.value)} placeholder="e.g. 3.50" type="number" step="0.01" min="0" style={inputStyle} />
+              </div>
             </div>
-            <div>
-              <label style={labelStyle}>MFE - best move in your favor</label>
-              <input value={mfe} onChange={(event) => setMfe(event.target.value)} placeholder="e.g. 3.50" type="number" step="0.01" min="0" style={inputStyle} />
-            </div>
-          </div>
+          </SectionCard>
 
-          <p style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", marginBottom: "12px", letterSpacing: "0.5px" }}>
-            TAGS
-          </p>
-          <div style={{ marginBottom: "20px" }}>
+          <SectionCard title="Tags">
             <TagSelector selected={tags} onChange={setTags} maxHeight={200} />
-          </div>
+          </SectionCard>
 
-          <p style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-secondary)", marginBottom: "12px", letterSpacing: "0.5px" }}>
-            JOURNAL NOTES
-          </p>
-          <textarea
-            value={journalEntry}
-            onChange={(event) => setJournalEntry(event.target.value)}
-            placeholder="What happened? What did you do well? What would you do differently?"
-            rows={4}
-            style={{ ...inputStyle, resize: "vertical", lineHeight: "1.6", marginBottom: "24px" }}
-          />
+          <SectionCard title="Journal Notes">
+            <textarea
+              value={journalEntry}
+              onChange={(event) => setJournalEntry(event.target.value)}
+              placeholder="What happened? What did you do well? What would you do differently?"
+              rows={4}
+              style={{ ...inputStyle, resize: "vertical", lineHeight: "1.6", minHeight: 112 }}
+            />
+          </SectionCard>
 
           <div style={{ display: "flex", gap: "12px", flexDirection: isMobile ? "column-reverse" : "row" }}>
             <button
@@ -430,15 +458,16 @@ export default function AddTradeModal({ onClose }: Props) {
               style={{
                 flex: 1,
                 padding: "12px",
-                borderRadius: "8px",
-                border: "none",
-                background: "var(--accent-green)",
-                color: "#000",
+                borderRadius: "12px",
+                border: "1px solid color-mix(in srgb, var(--accent-green) 28%, var(--border))",
+                background: "color-mix(in srgb, var(--accent-green) 14%, var(--bg-card))",
+                color: "var(--text-primary)",
                 fontSize: "14px",
                 fontWeight: "700",
                 cursor: saving ? "not-allowed" : "pointer",
                 opacity: saving ? 0.7 : 1,
                 fontFamily: "inherit",
+                boxShadow: "0 10px 22px color-mix(in srgb, var(--accent-green) 14%, transparent)",
               }}
             >
               {saving ? "Saving..." : "Save Trade"}
@@ -447,8 +476,8 @@ export default function AddTradeModal({ onClose }: Props) {
               onClick={onClose}
               style={{
                 padding: "12px 20px",
-                borderRadius: "8px",
-                border: "1px solid var(--border)",
+                borderRadius: "12px",
+                border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
                 background: "transparent",
                 color: "var(--text-primary)",
                 fontSize: "14px",

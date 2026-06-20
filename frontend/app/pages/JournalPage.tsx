@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { useApp } from "../context/AppContext";
 import { Trade } from "../lib/types";
 import {
-  ChevronDown, ChevronUp, Search, Tag,
+  CalendarRange, ChevronDown, ChevronUp, Search, Tag,
   TrendingUp, TrendingDown, BookOpen,
   MessageSquare, Image as ImageIcon, ExternalLink,
 } from "lucide-react";
@@ -16,6 +16,9 @@ interface DayGroup {
   wins: number;
   losses: number;
 }
+
+type JournalStatusFilter = "all" | "win" | "loss" | "breakeven";
+type JournalDirectionFilter = "all" | "long" | "short";
 
 function groupByDay(trades: Trade[]): DayGroup[] {
   const map: Record<string, Trade[]> = {};
@@ -245,7 +248,7 @@ function DayCard({
   onOpenEditor: (t: Trade) => void;
   compact: boolean;
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const isGreen = group.totalPnl >= 0;
   const winRate = group.trades.length > 0
     ? Math.round((group.wins / group.trades.length) * 100) : 0;
@@ -351,8 +354,11 @@ export default function JournalPage() {
   const { trades, setSelectedTrade, setActivePage, setActiveTradeId } = useApp();
   const { isMobile, isTablet } = useResponsive();
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "win" | "loss">("all");
+  const [filterStatus, setFilterStatus] = useState<JournalStatusFilter>("all");
+  const [direction, setDirection] = useState<JournalDirectionFilter>("all");
   const [filterTag, setFilterTag] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -366,16 +372,20 @@ export default function JournalPage() {
   const filtered = useMemo(() => {
     return trades.filter((t) => {
       if (filterStatus !== "all" && t.status !== filterStatus) return false;
+      if (direction !== "all" && (t.direction || "").toLowerCase() !== direction) return false;
       if (filterTag && !(Array.isArray(t.tags) ? t.tags : []).includes(filterTag)) return false;
+      if (fromDate && t.date < fromDate) return false;
+      if (toDate && t.date > toDate) return false;
       if (search) {
         const q = search.toLowerCase();
         const notes = (t.journalEntry || "").toLowerCase();
         const symbol = t.underlying.toLowerCase();
-        if (!notes.includes(q) && !symbol.includes(q)) return false;
+        const tags = (Array.isArray(t.tags) ? t.tags : []).join(" ").toLowerCase();
+        if (!notes.includes(q) && !symbol.includes(q) && !tags.includes(q)) return false;
       }
       return true;
     });
-  }, [trades, filterStatus, filterTag, search]);
+  }, [trades, filterStatus, direction, filterTag, fromDate, toDate, search]);
 
   const groups = useMemo(() => groupByDay(filtered), [filtered]);
 
@@ -429,7 +439,7 @@ export default function JournalPage() {
           {
             label: "Days Traded",
             value: String(groups.length),
-            color: "var(--text-primary)",
+            tone: "neutral",
             icon: BookOpen,
           },
           {
@@ -437,7 +447,7 @@ export default function JournalPage() {
             value: bestDay === -Infinity || bestDay === 0
               ? "$0.00"
               : `+$${bestDay.toFixed(2)}`,
-            color: "#00e57a",
+            tone: "positive",
             icon: TrendingUp,
           },
           {
@@ -445,109 +455,232 @@ export default function JournalPage() {
             value: worstDay === Infinity || worstDay === 0
               ? "$0.00"
               : `$${worstDay.toFixed(2)}`,
-            color: "#ff4d6a",
+            tone: "negative",
             icon: TrendingDown,
           },
           {
             label: "Notes Written",
             value: `${journalledTrades} / ${trades.length}`,
-            color: "var(--accent-green)",
+            tone: "neutral",
             icon: MessageSquare,
           },
-        ].map(({ label, value, color, icon: Icon }) => (
+        ].map(({ label, value, tone, icon: Icon }) => (
           <div key={label} style={{
-            background: "var(--bg-card)", border: "1px solid var(--border)",
-            borderRadius: "12px", padding: "16px 18px",
+            borderRadius: "14px",
+            border: "1px solid var(--border)",
+            background:
+              "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 92%, white 8%) 0%, var(--bg-card) 100%)",
+            padding: "14px",
+            minHeight: "96px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
           }}>
             <div style={{
-              display: "flex", justifyContent: "space-between",
-              alignItems: "center", marginBottom: "10px",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "12px",
+              alignItems: "flex-start",
             }}>
-              <span style={{
-                fontSize: "11px", fontWeight: "600", color: "var(--text-muted)",
-                textTransform: "uppercase", letterSpacing: "0.5px",
-              }}>
-                {label}
-              </span>
+              <div>
+                <div style={{ color: "var(--text-muted)", fontSize: "12px", fontWeight: 500, lineHeight: 1.45 }}>
+                  {label}
+                </div>
+                <div
+                  className="num-tabular"
+                  style={{
+                    marginTop: "12px",
+                    lineHeight: 1,
+                    color:
+                      tone === "positive"
+                        ? "#00e57a"
+                        : tone === "negative"
+                          ? "#ff4d6a"
+                          : "var(--text-primary)",
+                    fontSize: "18px",
+                    fontWeight: 800,
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  {value}
+                </div>
+              </div>
               <div style={{
-                width: "28px", height: "28px", borderRadius: "8px",
-                background: "var(--accent-green-dim)", display: "flex",
-                alignItems: "center", justifyContent: "center",
+                width: "32px",
+                height: "32px",
+                borderRadius: "10px",
+                display: "grid",
+                placeItems: "center",
+                background: "var(--accent-green-dim)",
+                border: "1px solid color-mix(in srgb, var(--accent-green) 28%, transparent)",
+                flexShrink: 0,
               }}>
-                <Icon size={13} color="var(--accent-green)" />
+                <Icon size={14} color="var(--accent-green)" />
               </div>
             </div>
-            <div style={{ fontSize: "20px", fontWeight: "800", color }}>{value}</div>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div style={{
-        display: "flex", gap: "10px", marginBottom: "24px",
-        alignItems: "center", flexWrap: "wrap",
-      }}>
-        <div style={{ position: "relative", flex: 1, minWidth: isMobile ? "100%" : "200px" }}>
-          <Search
-            size={14}
-            color="var(--text-muted)"
-            style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)" }}
-          />
+      <section
+        style={{
+          marginBottom: "24px",
+          borderRadius: "20px",
+          border: "1px solid var(--border)",
+          background: "var(--bg-card)",
+          padding: isMobile ? "14px" : "16px",
+        }}
+      >
+        <div style={{
+          display: "flex", gap: "10px",
+          alignItems: "center", flexWrap: "wrap",
+        }}>
+          <div style={{ position: "relative", flex: 1, minWidth: isMobile ? "100%" : "220px" }}>
+            <Search
+              size={14}
+              color="var(--text-muted)"
+              style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)" }}
+            />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search symbol, tag, or note..."
+              style={{
+                width: "100%",
+                padding: "9px 12px 9px 34px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+                color: "var(--text-primary)",
+                fontSize: "13px",
+                fontFamily: "inherit",
+                boxSizing: "border-box" as const,
+                outline: "none",
+              }}
+            />
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <ChevronDown
+              size={12}
+              color="var(--text-muted)"
+              style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+            />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as JournalStatusFilter)}
+              style={{
+                padding: "8px 30px 8px 12px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+                color: filterStatus === "all" ? "var(--text-muted)" : "var(--accent-green)",
+                fontSize: "12px",
+                fontFamily: "inherit",
+                cursor: "pointer",
+                appearance: "none" as const,
+                outline: "none",
+              }}
+              >
+                <option value="all">All status</option>
+                <option value="win">Wins</option>
+                <option value="loss">Losses</option>
+                <option value="breakeven">Breakeven</option>
+              </select>
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <ChevronDown
+              size={12}
+              color="var(--text-muted)"
+              style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+            />
+            <select
+              value={direction}
+              onChange={(e) => setDirection(e.target.value as JournalDirectionFilter)}
+              style={{
+                padding: "8px 30px 8px 12px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+                color: direction === "all" ? "var(--text-muted)" : "var(--accent-green)",
+                fontSize: "12px",
+                fontFamily: "inherit",
+                cursor: "pointer",
+                appearance: "none" as const,
+                outline: "none",
+              }}
+            >
+              <option value="all">All directions</option>
+              <option value="long">Long</option>
+              <option value="short">Short</option>
+            </select>
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <CalendarRange
+              size={12}
+              color="var(--text-muted)"
+              style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)" }}
+            />
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              style={{
+                padding: "8px 12px 8px 30px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+                color: fromDate ? "var(--text-primary)" : "var(--text-muted)",
+                fontSize: "12px",
+                fontFamily: "inherit",
+                outline: "none",
+              }}
+            />
+          </div>
+
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search notes or symbol..."
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
             style={{
-              width: "100%", padding: "9px 12px 9px 34px", borderRadius: "8px",
-              border: "1px solid var(--border)", background: "var(--bg-card)",
-              color: "var(--text-primary)", fontSize: "13px",
-              fontFamily: "inherit", boxSizing: "border-box" as const,
+              padding: "8px 12px",
+              borderRadius: "8px",
+              border: "1px solid var(--border)",
+              background: "var(--bg-card)",
+              color: toDate ? "var(--text-primary)" : "var(--text-muted)",
+              fontSize: "12px",
+              fontFamily: "inherit",
               outline: "none",
             }}
           />
-        </div>
 
-        <div style={{ display: "flex", gap: "6px" }}>
-          {(["all", "win", "loss"] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              style={{
-                padding: "8px 16px", borderRadius: "8px", border: "1px solid",
-                borderColor: filterStatus === status
-                  ? status === "win" ? "#00e57a" : status === "loss" ? "#ff4d6a" : "var(--accent-green)"
-                  : "var(--border)",
-                background: filterStatus === status
-                  ? status === "win" ? "rgba(0,229,122,0.1)" : status === "loss" ? "rgba(255,77,106,0.1)" : "var(--accent-green-dim)"
-                  : "transparent",
-                color: filterStatus === status
-                  ? status === "win" ? "#00e57a" : status === "loss" ? "#ff4d6a" : "var(--accent-green)"
-                  : "var(--text-muted)",
-                fontSize: "12px", fontWeight: "600", cursor: "pointer",
-                fontFamily: "inherit",
-              }}
-            >
-              {status === "all" ? "All" : status === "win" ? "Wins" : "Losses"}
-            </button>
-          ))}
-        </div>
-
-        {allTags.length > 0 && (
           <div style={{ position: "relative" }}>
             <Tag
               size={12}
               color="var(--text-muted)"
               style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)" }}
             />
+            <ChevronDown
+              size={12}
+              color="var(--text-muted)"
+              style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+            />
             <select
               value={filterTag}
               onChange={(e) => setFilterTag(e.target.value)}
               style={{
-                padding: "8px 12px 8px 28px", borderRadius: "8px",
-                border: "1px solid var(--border)", background: "var(--bg-card)",
+                padding: "8px 30px 8px 28px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
                 color: filterTag ? "var(--accent-green)" : "var(--text-muted)",
-                fontSize: "12px", fontFamily: "inherit",
-                cursor: "pointer", appearance: "none" as const,
+                fontSize: "12px",
+                fontFamily: "inherit",
+                cursor: "pointer",
+                appearance: "none" as const,
                 outline: "none",
               }}
             >
@@ -557,8 +690,8 @@ export default function JournalPage() {
               ))}
             </select>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
 
       {/* Day groups */}
       {groups.length === 0 ? (

@@ -24,6 +24,7 @@ import { useApp } from "../context/AppContext";
 import { Trade, JournalTemplate } from "../lib/types";
 import JournalToolbar from "../components/JournalToolbar";
 import TagSelector from "../components/TagSelector";
+import { useResponsive } from "../hooks/useResponsive";
 import {
   ArrowLeft, FileText, Check, Loader, LayoutTemplate, X, Trash2,
 } from "lucide-react";
@@ -68,14 +69,20 @@ function buildTipTapDoc(plainText: string) {
 function StatPill({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div style={{
-      display: "flex", flexDirection: "column", gap: 2,
-      padding: "10px 14px", borderRadius: 8,
-      background: "var(--bg-secondary)", border: "1px solid var(--border)",
+      display: "flex",
+      flexDirection: "column",
+      gap: 5,
+      padding: "12px 14px",
+      borderRadius: 14,
+      background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 90%, white 10%) 0%, var(--bg-secondary) 100%)",
+      border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+      minWidth: 104,
     }}>
-      <span style={{ fontSize: 10, fontWeight: 600, color: "var(--text-muted)", letterSpacing: "0.4px" }}>
+      <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.12em" }}>
         {label}
       </span>
-      <span style={{ fontSize: 14, fontWeight: 700, color: color || "var(--text-primary)" }}>
+      <span className="num-tabular" style={{ fontSize: 14, fontWeight: 800, color: color || "var(--text-primary)", letterSpacing: "-0.02em" }}>
         {value}
       </span>
     </div>
@@ -296,6 +303,7 @@ type SaveState = "idle" | "saving" | "saved";
 
 export default function JournalEditorPage() {
   const { trades, activeTradeId, setActivePage, updateTradeInMemory } = useApp();
+  const { isMobile, isTablet } = useResponsive();
   const trade: Trade | null = trades.find((t) => t.id === activeTradeId) ?? null;
   const templatesQuery = useJournalTemplatesQuery();
   const createTemplateMutation = useCreateJournalTemplateMutation();
@@ -467,7 +475,7 @@ export default function JournalEditorPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", gap: 0 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexShrink: 0 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "center", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 12 : 0, marginBottom: 20, flexShrink: 0 }}>
         <button
           onClick={() => setActivePage("journal")}
           style={{
@@ -483,7 +491,7 @@ export default function JournalEditorPage() {
           Back to Journal
         </button>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: isMobile ? "flex-start" : "flex-end" }}>
           <div style={{
             display: "flex", alignItems: "center", gap: 6, fontSize: 12, minWidth: 70,
             color: saveState === "saved" ? "var(--accent-green)" : "var(--text-muted)",
@@ -528,37 +536,75 @@ export default function JournalEditorPage() {
       </div>
 
       <div style={{
-        background: "var(--bg-card)", border: "1px solid var(--border)",
-        borderRadius: 14, padding: "20px 24px", marginBottom: 16, flexShrink: 0,
+        background: "linear-gradient(135deg, color-mix(in srgb, var(--bg-card) 94%, white 6%) 0%, var(--bg-card) 58%, color-mix(in srgb, var(--accent-green) 6%, var(--bg-card)) 100%)",
+        border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+        borderRadius: 22,
+        padding: isMobile ? "14px" : isTablet ? "16px 18px" : "18px 20px",
+        marginBottom: 16,
+        flexShrink: 0,
+        boxShadow: "0 14px 30px rgba(15,23,42,0.07)",
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "flex-start", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 12 : 16, marginBottom: 16, flexWrap: "wrap" }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+              <span style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "6px 10px",
+                borderRadius: 999,
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                background: isWin ? "rgba(0,229,122,0.12)" : "rgba(255,77,106,0.12)",
+                color: isWin ? "var(--accent-green)" : "#ff4d6a",
+                border: `1px solid ${isWin ? "rgba(0,229,122,0.18)" : "rgba(255,77,106,0.18)"}`,
+              }}>
+                {trade.status.toUpperCase()}
+              </span>
+              {trade.optionType && (
+                <span style={{
+                  padding: "6px 10px",
+                  borderRadius: 999,
+                  fontSize: 10,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  background: trade.optionType === "call" ? "rgba(77,159,255,0.12)" : "rgba(255,77,106,0.12)",
+                  color: trade.optionType === "call" ? "#4d9fff" : "#ff4d6a",
+                  border: `1px solid ${trade.optionType === "call" ? "rgba(77,159,255,0.18)" : "rgba(255,77,106,0.18)"}`,
+                }}>
+                  {trade.optionType.toUpperCase()}
+                </span>
+              )}
+            </div>
+            <h2 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.05em", lineHeight: 1.05, margin: 0, wordBreak: "break-word" }}>
               {trade.underlying}
             </h2>
-            {trade.optionType && (
-              <span style={{
-                padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-                background: trade.optionType === "call" ? "rgba(77,159,255,0.12)" : "rgba(255,77,106,0.12)",
-                color: trade.optionType === "call" ? "#4d9fff" : "#ff4d6a",
-              }}>
-                {trade.optionType.toUpperCase()}
-              </span>
-            )}
-            <span style={{
-              padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-              background: isWin ? "var(--accent-green-dim)" : "rgba(255,77,106,0.12)",
-              color: isWin ? "var(--accent-green)" : "#ff4d6a",
-            }}>
-              {trade.status.toUpperCase()}
-            </span>
+            <div style={{ marginTop: 6, color: "var(--text-secondary)", fontSize: 12, fontWeight: 500 }}>
+              Trade snapshot and execution details
+            </div>
           </div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: isWin ? "var(--accent-green)" : "#ff4d6a" }}>
-            {isWin ? "+" : ""}${trade.pnl.toFixed(2)}
+          <div
+            style={{
+              padding: "13px 15px",
+              borderRadius: 18,
+              background: "linear-gradient(180deg, rgba(9,12,20,0.02), rgba(9,12,20,0.08))",
+              border: `1px solid ${isWin ? "rgba(0,229,122,0.16)" : "rgba(255,77,106,0.16)"}`,
+              minWidth: isMobile ? "100%" : 138,
+              width: isMobile ? "100%" : "auto",
+            }}
+          >
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              P&amp;L
+            </div>
+            <div className="num-tabular" style={{ marginTop: 6, fontSize: isMobile ? 22 : 24, fontWeight: 800, lineHeight: 1, color: isWin ? "var(--accent-green)" : "#ff4d6a", letterSpacing: "-0.04em" }}>
+              {isWin ? "+" : ""}${trade.pnl.toFixed(2)}
+            </div>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "repeat(auto-fit, minmax(108px, 1fr))", gap: 8, marginBottom: 16 }}>
           <StatPill label="DATE"  value={trade.date} />
           <StatPill label="ENTRY" value={`$${trade.entryPrice}`} />
           <StatPill label="EXIT"  value={`$${trade.exitPrice}`} />
@@ -571,10 +617,19 @@ export default function JournalEditorPage() {
         </div>
 
         <div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", letterSpacing: "0.5px", marginBottom: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 8 }}>
             TAGS
           </div>
-          <TagSelector selected={currentTags} onChange={saveTags} maxHeight={180} />
+          <div
+            style={{
+              borderRadius: 16,
+              border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+              background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 92%, white 8%) 0%, var(--bg-secondary) 100%)",
+              padding: "12px",
+            }}
+          >
+            <TagSelector selected={currentTags} onChange={saveTags} maxHeight={180} />
+          </div>
         </div>
       </div>
               

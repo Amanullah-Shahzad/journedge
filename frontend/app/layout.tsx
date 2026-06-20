@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AsaanJournal",
-  description: "The open source trading journal built for serious traders.",
+  title: "Asaan Journal - Trading Journal and Performance Analytics",
+  description: "Track trades, import CSV files, attach screenshots, review analytics, and improve trading discipline with Asaan Journal.",
   icons: {
     icon: "/asaanjournal-icon.svg",
     shortcut: "/asaanjournal-icon.svg",
