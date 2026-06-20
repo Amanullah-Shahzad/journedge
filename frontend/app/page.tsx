@@ -44,6 +44,8 @@ type ValueCard = {
   glow: string;
 };
 
+type SocialPlatform = "Facebook" | "X" | "Instagram" | "TikTok" | "Discord" | "LinkedIn";
+
 const NAV_ITEMS = [
   { label: "Features", href: "#features" },
   { label: "How it works", href: "#how-it-works" },
@@ -119,13 +121,13 @@ const TESTIMONIALS = [
   },
 ];
 
-const SOCIAL_LINKS = [
+const SOCIAL_LINKS: ReadonlyArray<{ label: SocialPlatform; href: string }> = [
   { label: "Facebook", href: "https://www.facebook.com/AsaanJournal/" },
   { label: "X", href: "https://x.com/asaanjournal" },
   { label: "Instagram", href: "https://instagram.com/asaanjournal" },
   { label: "TikTok", href: "https://tiktok.com/asaanjournal" },
   { label: "Discord", href: "https://discord.com/assanjournal" },
-] as const;
+];
 
 const FAQS = [
   {
@@ -401,7 +403,7 @@ function AnalyticsMockup() {
   );
 }
 
-function SocialIcon({ label }: { label: (typeof SOCIAL_LINKS)[number]["label"] }) {
+function SocialIcon({ label }: { label: SocialPlatform }) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "currentColor" };
 
   switch (label) {
