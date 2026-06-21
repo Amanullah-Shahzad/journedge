@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarRange,
   ChevronDown,
@@ -408,7 +408,7 @@ function KpiCard({ title, value, icon: Icon, tone }: TradesKpiCard) {
 }
 
 export default function TradesPage() {
-  const { accounts, setSelectedTrade, setActivePage, setActiveTradeId } = useApp();
+  const { accounts, activeAccount, setSelectedTrade, setActivePage, setActiveTradeId } = useApp();
   const { isMobile, isTablet } = useResponsive();
   const deleteTradeMutation = useDeleteTradeMutation();
   const tradesQuery = useTradesQuery();
@@ -418,11 +418,16 @@ export default function TradesPage() {
   const [status, setStatus] = useState<StatusFilter>("all");
   const [direction, setDirection] = useState<DirectionFilter>("all");
   const [sortBy, setSortBy] = useState<SortKey>("newest");
+  const [accountFilter, setAccountFilter] = useState<string>(activeAccount?.id ?? "all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [tradeToDelete, setTradeToDelete] = useState<Trade | null>(null);
 
   const accountMap = useMemo(() => new Map(accounts.map((account) => [account.id, account.name])), [accounts]);
+
+  useEffect(() => {
+    setAccountFilter(activeAccount?.id ?? "all");
+  }, [activeAccount?.id]);
 
   const filteredTrades = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -431,13 +436,14 @@ export default function TradesPage() {
       const note = parseNote(trade.journalEntry).toLowerCase();
       const tagText = Array.isArray(trade.tags) ? trade.tags.join(" ").toLowerCase() : "";
       const symbolText = `${trade.symbol} ${trade.underlying}`.toLowerCase();
+      const accountMatch = accountFilter === "all" ? true : trade.accountId === accountFilter;
       const statusMatch = status === "all" ? true : trade.status === status;
       const directionMatch = direction === "all" ? true : (trade.direction || "").toLowerCase() === direction;
       const fromMatch = fromDate ? trade.date >= fromDate : true;
       const toMatch = toDate ? trade.date <= toDate : true;
       const searchMatch = term ? symbolText.includes(term) || tagText.includes(term) || note.includes(term) : true;
 
-      return statusMatch && directionMatch && fromMatch && toMatch && searchMatch;
+      return accountMatch && statusMatch && directionMatch && fromMatch && toMatch && searchMatch;
     });
 
     results.sort((left, right) => {
@@ -448,7 +454,7 @@ export default function TradesPage() {
     });
 
     return results;
-  }, [allTrades, direction, fromDate, search, sortBy, status, toDate]);
+  }, [accountFilter, allTrades, direction, fromDate, search, sortBy, status, toDate]);
 
   const summary = useMemo(() => {
     const pnl = filteredTrades.reduce((sum, trade) => sum + trade.pnl, 0);
@@ -521,6 +527,38 @@ export default function TradesPage() {
                 outline: "none",
               }}
             />
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <ChevronDown
+              size={12}
+              color="var(--text-muted)"
+              style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
+            />
+            <select
+              value={accountFilter}
+              onChange={(event) => setAccountFilter(event.target.value)}
+              style={{
+                padding: "8px 30px 8px 12px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+                color: accountFilter === "all" ? "var(--text-muted)" : "var(--accent-green)",
+                fontSize: "12px",
+                fontFamily: "inherit",
+                cursor: "pointer",
+                appearance: "none",
+                outline: "none",
+                minWidth: 148,
+              }}
+            >
+              <option value="all">All accounts</option>
+              {accounts.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ position: "relative" }}>

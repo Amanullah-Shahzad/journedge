@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useCurrentUserQuery } from "@/lib/api/auth";
 
 import AddTradeModal from "../components/AddTradeModal";
 import AppHeader from "../components/AppHeader";
@@ -70,6 +72,19 @@ function AppShell() {
 }
 
 export default function WorkspacePage() {
+  const router = useRouter();
+  const currentUserQuery = useCurrentUserQuery(true);
+
+  useEffect(() => {
+    if (currentUserQuery.data?.role === "admin") {
+      router.replace("/admin");
+    }
+  }, [currentUserQuery.data?.role, router]);
+
+  if (currentUserQuery.data?.role === "admin") {
+    return null;
+  }
+
   return (
     <AuthGate>
       <AppProvider>

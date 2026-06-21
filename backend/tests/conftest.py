@@ -18,7 +18,7 @@ from app.main import app  # noqa: E402
 
 
 @pytest.fixture()
-def client():
+def client_and_db():
     storage = getattr(app.state.limiter, "_storage", None)
     if storage and hasattr(storage, "reset"):
         storage.reset()
@@ -39,5 +39,15 @@ def client():
 
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
-        yield test_client
+        db = TestingSessionLocal()
+        try:
+            yield test_client, db
+        finally:
+            db.close()
     app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def client(client_and_db):
+    test_client, _db = client_and_db
+    return test_client

@@ -39,4 +39,13 @@ export const queryKeys = {
     user: () => ["settings", "user"] as const,
     latestRelease: () => ["settings", "latest-release"] as const,
   },
+  admin: {
+    summary: () => ["admin", "summary"] as const,
+    users: (filters: unknown) => ["admin", "users", filters] as const,
+    trades: (filters: unknown) => ["admin", "trades", filters] as const,
+    imports: (filters: unknown) => ["admin", "imports", filters] as const,
+    assets: (filters: unknown) => ["admin", "assets", filters] as const,
+    analytics: () => ["admin", "analytics"] as const,
+    report: () => ["admin", "report"] as const,
+  },
 } as const;

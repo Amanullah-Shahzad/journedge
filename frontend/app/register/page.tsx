@@ -263,7 +263,7 @@ export default function RegisterPage() {
           if (!validate()) return;
 
           try {
-            await registerMutation.mutateAsync({
+            const response = await registerMutation.mutateAsync({
               email,
               password,
               full_name: fullName.trim(),
@@ -271,7 +271,7 @@ export default function RegisterPage() {
               preferred_market: preferredMarket,
               country,
             });
-            router.replace("/workspace");
+            router.replace(response.user.role === "admin" ? "/admin" : "/workspace");
             router.refresh();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Sign up failed");

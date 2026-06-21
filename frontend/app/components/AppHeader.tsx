@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Shield,
   Bell,
   LogOut,
   Menu,
@@ -305,6 +306,33 @@ export default function AppHeader({ onOpenMenu }: { onOpenMenu?: () => void }) {
                 <User size={15} />
                 Profile
               </button>
+              {currentUserQuery.data?.role === "admin" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    router.push("/admin");
+                  }}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 12px",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: "transparent",
+                    color: "var(--text-primary)",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <Shield size={15} />
+                  Admin Dashboard
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() => {

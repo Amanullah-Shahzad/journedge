@@ -251,3 +251,80 @@ export interface ExportDatasetResponse {
 export interface LatestReleaseResponse {
   tag_name?: string;
 }
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  fullName?: string | null;
+  role: string;
+  isVerified: boolean;
+  isActive: boolean;
+  country?: string | null;
+  preferredMarket?: string | null;
+  tradingExperience?: string | null;
+  createdAt: string;
+}
+
+export interface AdminTrade extends Trade {
+  userId: string;
+  userEmail: string;
+  journalPreview?: string;
+}
+
+export interface AdminImportItem {
+  id: string;
+  userId: string;
+  userEmail: string;
+  accountId?: string | null;
+  source: string;
+  filename: string;
+  status: string;
+  totalRows: number;
+  validRows: number;
+  duplicateRows: number;
+  invalidRows: number;
+  createdAt: string;
+}
+
+export interface AdminAssetItem {
+  id: string;
+  userId: string;
+  userEmail: string;
+  tradeId?: string | null;
+  storageKey: string;
+  url: string;
+  contentType: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
+export interface AdminSummaryResponse {
+  users: {
+    total: number;
+    active: number;
+    admins: number;
+    byCountry: Array<{
+      country: string;
+      count: number;
+    }>;
+  };
+  trades: { total: number; tradesPerDay: AnalyticsPoint[] };
+  imports: { total: number };
+  screenshots: { total: number };
+  analytics: AnalyticsSummary;
+}
+
+export interface AdminAnalyticsResponse extends AnalyticsSummary {
+  active_users: number;
+  total_users: number;
+}

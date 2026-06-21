@@ -143,8 +143,8 @@ export default function LoginPage() {
           event.preventDefault();
           setError("");
           try {
-            await loginMutation.mutateAsync({ email, password });
-            router.replace("/workspace");
+            const response = await loginMutation.mutateAsync({ email, password });
+            router.replace(response.user.role === "admin" ? "/admin" : "/workspace");
             router.refresh();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Login failed");
