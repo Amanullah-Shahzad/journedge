@@ -451,7 +451,7 @@ function SocialIcon({ label }: { label: SocialPlatform }) {
 function SocialLinksSection() {
   return (
     <section style={{ width: "min(1200px, calc(100% - 32px))", margin: "0 auto", padding: "8px 0 88px" }}>
-      <Surface style={{ padding: "24px 20px", borderRadius: 28, position: "relative" }}>
+      <Surface style={{ padding: "24px 20px", borderRadius: 28, position: "relative", overflow: "hidden" }}>
         <div
           style={{
             position: "absolute",
@@ -541,6 +541,9 @@ export default function LandingPage() {
         "--overlay": "rgba(0, 0, 0, 0.6)",
         background: "var(--bg-primary)",
         color: "var(--text-primary)",
+        width: "100%",
+        maxWidth: "100%",
+        overflowX: "hidden",
       } as React.CSSProperties}
     >
       <style>{`
