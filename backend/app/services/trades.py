@@ -54,12 +54,16 @@ def duplicate_key(payload: dict[str, Any], account_id: str | None) -> str:
         "underlying": payload["underlying"],
         "type": payload["type"],
         "direction": payload["direction"],
+        "tradingStyle": payload.get("tradingStyle"),
         "optionType": payload.get("optionType"),
         "strike": round(float(payload.get("strike") or 0), 4),
         "expiry": payload.get("expiry"),
+        "positionType": payload.get("positionType"),
         "quantity": round(float(payload["quantity"]), 4),
         "entryPrice": round(float(payload["entryPrice"]), 4),
         "exitPrice": round(float(payload["exitPrice"]), 4),
+        "stopLoss": round(float(payload.get("stopLoss") or 0), 4),
+        "takeProfit": round(float(payload.get("takeProfit") or 0), 4),
         "commission": round(float(payload.get("commission") or 0), 4),
         "fees": round(float(payload.get("fees") or 0), 4),
         "pnl": round(float(payload["pnl"]), 4),
@@ -94,19 +98,25 @@ def upsert_trade(
     data.import_job_id = import_job_id
     data.date = parse_iso_date(payload["date"])
     data.symbol = payload["symbol"]
+    data.symbol_source = payload.get("symbolSource")
     data.underlying = payload["underlying"]
     data.type = payload["type"]
     data.direction = payload["direction"]
+    data.trading_style = payload.get("tradingStyle")
     data.option_type = payload.get("optionType")
     data.strike = payload.get("strike")
     data.expiry = parse_iso_date(payload["expiry"]) if payload.get("expiry") else None
+    data.position_type = payload.get("positionType")
     data.quantity = float(payload["quantity"])
     data.entry_price = float(payload["entryPrice"])
     data.exit_price = float(payload["exitPrice"])
+    data.stop_loss = float(payload["stopLoss"]) if payload.get("stopLoss") is not None else None
+    data.take_profit = float(payload["takeProfit"]) if payload.get("takeProfit") is not None else None
     data.commission = float(payload.get("commission") or 0)
     data.fees = float(payload.get("fees") or 0)
     data.pnl = float(payload["pnl"])
     data.status = payload["status"]
+    data.emotion = payload.get("emotion")
     data.entry_time = payload.get("entryTime")
     data.exit_time = payload.get("exitTime")
     data.rr = payload.get("rr")

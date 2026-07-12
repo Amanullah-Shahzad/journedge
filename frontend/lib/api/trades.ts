@@ -14,6 +14,11 @@ interface TradeCreatePayload {
   accountId?: string | null;
 }
 
+interface TradeCreateResponse {
+  success: boolean;
+  trades: Trade[];
+}
+
 function normalizeTrades(trades: Trade[]) {
   return trades.map(normalizeTrade);
 }
@@ -24,7 +29,10 @@ export function listTrades(accountId?: string | null) {
 }
 
 export function createTrades(payload: TradeCreatePayload) {
-  return apiPost<{ success: boolean }>("/api/trades", payload);
+  return apiPost<TradeCreateResponse>("/api/trades", payload).then((response) => ({
+    ...response,
+    trades: normalizeTrades(response.trades ?? []),
+  }));
 }
 
 export function updateTrade(payload: TradeUpsertInput) {
@@ -95,4 +103,3 @@ export function useClearTradesMutation() {
     },
   });
 }
-

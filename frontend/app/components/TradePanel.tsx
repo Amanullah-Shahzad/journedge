@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, ExternalLink, Image, Link as LinkIcon, Pencil, Save, Trash2, TrendingUp, X } from "lucide-react";
+import { ChevronDown, ExternalLink, Image, Pencil, Save, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { useUploadScreenshotMutation } from "@/lib/api/screenshots";
@@ -17,28 +17,157 @@ interface Props {
   onClose: () => void;
 }
 
+const TRADE_TYPE_OPTIONS = [
+  { value: "stock", label: "Stock" },
+  { value: "options", label: "Options" },
+  { value: "futures", label: "Futures" },
+  { value: "forex", label: "Forex" },
+  { value: "crypto", label: "Crypto" },
+  { value: "commodity", label: "Commodity" },
+  { value: "index", label: "Index / CFD" },
+  { value: "etf", label: "ETF" },
+] as const;
+
+const POSITION_TYPE_BY_TRADE: Record<string, string> = {
+  stock: "shares",
+  options: "contracts",
+  futures: "contracts",
+  forex: "lots",
+  crypto: "coins",
+  commodity: "lots",
+  index: "contracts",
+  etf: "shares",
+};
+
+const SYMBOL_OPTIONS_BY_TRADE: Record<string, string[]> = {
+  stock: [
+    "AAPL", "MSFT", "NVDA", "AMZN", "META", "GOOGL", "TSLA", "AMD", "NFLX", "PLTR",
+    "UBER", "SHOP", "INTC", "COIN", "BABA", "PYPL", "DIS", "JPM", "BAC", "SNOW",
+  ],
+  options: [
+    "AAPL", "SPY", "QQQ", "TSLA", "NVDA", "AMD", "META", "MSFT", "AMZN", "IWM",
+    "COIN", "NFLX", "PLTR", "GOOGL", "SMCI", "BA", "JPM", "XOM", "GLD", "SLV",
+  ],
+  futures: [
+    "ES", "MES", "NQ", "MNQ", "YM", "RTY", "CL", "MCL", "GC", "MGC",
+    "SI", "HG", "NG", "ZB", "ZN", "6E", "6B", "6J", "ZW", "ZC",
+  ],
+  forex: [
+    "EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "USD/CAD", "NZD/USD", "EUR/JPY", "GBP/JPY", "EUR/GBP",
+    "AUD/JPY", "CHF/JPY", "EUR/AUD", "GBP/AUD", "XAU/USD", "XAG/USD", "USD/SGD", "EUR/CAD", "GBP/CAD", "AUD/CAD",
+  ],
+  crypto: [
+    "BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD", "BNB/USD", "ADA/USD", "DOGE/USD", "AVAX/USD", "LINK/USD", "MATIC/USD",
+    "DOT/USD", "LTC/USD", "TRX/USD", "UNI/USD", "ATOM/USD", "ARB/USD", "OP/USD", "APT/USD", "SUI/USD", "PEPE/USD",
+  ],
+  commodity: [
+    "Gold", "Silver", "Crude Oil", "Brent Oil", "Natural Gas", "Copper", "Platinum", "Palladium", "Corn", "Wheat",
+    "Soybeans", "Coffee", "Sugar", "Cotton", "Cocoa", "Lean Hogs", "Live Cattle", "Aluminum", "Nickel", "Uranium",
+  ],
+  index: [
+    "S&P 500", "Nasdaq 100", "Dow Jones", "Russell 2000", "DAX 40", "FTSE 100", "CAC 40", "Nikkei 225", "Hang Seng", "ASX 200",
+    "Euro Stoxx 50", "US 30", "US 100", "US 500", "GER 40", "UK 100", "JP 225", "HK 50", "AUS 200", "VIX",
+  ],
+  etf: [
+    "SPY", "QQQ", "IWM", "DIA", "VTI", "VOO", "ARKK", "XLF", "XLK", "XLE",
+    "GLD", "SLV", "TLT", "HYG", "EEM", "FXI", "SMH", "SOXX", "TQQQ", "SQQQ",
+  ],
+};
+
+const POSITION_TYPE_LABELS: Record<string, string> = {
+  shares: "Shares",
+  coins: "Coins / Tokens",
+  lots: "Lots",
+  contracts: "Contracts",
+  units: "Units",
+  usd: "USD Amount",
+};
+
+const DIRECTION_OPTIONS = [
+  { value: "long", label: "Long" },
+  { value: "short", label: "Short" },
+] as const;
+
+const TRADING_STYLE_OPTIONS = [
+  "Scalping",
+  "Day Trading",
+  "Swing Trading",
+  "Position Trading",
+] as const;
+
+const EMOTION_OPTIONS = [
+  "Neutral",
+  "Calm",
+  "Confident",
+  "Fearful",
+  "Greedy",
+  "FOMO",
+] as const;
+
+const OPTION_TYPE_OPTIONS = [
+  { value: "call", label: "Call" },
+  { value: "put", label: "Put" },
+] as const;
+
+type DropdownOption = {
+  value: string;
+  label: string;
+};
+
 type TradeDraft = {
   symbol: string;
   underlying: string;
   type: string;
+  direction: string;
+  tradingStyle: string;
+  optionType: string;
+  strike: string;
+  positionType: string;
+  stopLoss: string;
+  takeProfit: string;
   status: string;
   date: string;
   pnl: string;
   quantity: string;
   entryPrice: string;
   exitPrice: string;
-  commission: string;
-  fees: string;
+  emotion: string;
   expiry: string;
   entryTime: string;
   exitTime: string;
   rr: string;
-  mae: string;
-  mfe: string;
   journalEntry: string;
   tags: string[];
   link: string;
   imageUrls: string[];
+};
+
+const EMPTY_DRAFT: TradeDraft = {
+  symbol: "",
+  underlying: "",
+  type: "stock",
+  direction: "long",
+  tradingStyle: "Scalping",
+  optionType: "call",
+  strike: "",
+  positionType: "",
+  stopLoss: "",
+  takeProfit: "",
+  status: "",
+  date: "",
+  pnl: "",
+  quantity: "",
+  entryPrice: "",
+  exitPrice: "",
+  emotion: "Neutral",
+  expiry: "",
+  entryTime: "",
+  exitTime: "",
+  rr: "",
+  journalEntry: "",
+  tags: [],
+  link: "",
+  imageUrls: [],
 };
 
 function renderJournalPreview(raw: string | null | undefined): string {
@@ -93,30 +222,170 @@ function convertFromPickerValue(value: string) {
   return value.trim();
 }
 
+function formatDateTimeAmPm(date?: string | null, time?: string | null) {
+  if (!date && !time) return "Not added";
+  if (date && time) {
+    const [hoursRaw, minutesRaw] = time.split(":");
+    const hours = Number.parseInt(hoursRaw || "", 10);
+    const minutes = Number.parseInt(minutesRaw || "", 10);
+    if (Number.isFinite(hours) && Number.isFinite(minutes)) {
+      const suffix = hours >= 12 ? "PM" : "AM";
+      const hour12 = hours % 12 || 12;
+      return `${formatDate(date)} · ${hour12}:${String(minutes).padStart(2, "0")} ${suffix}`;
+    }
+    return `${formatDate(date)} · ${time}`;
+  }
+  if (date) return formatDate(date);
+  return emptyValue(time);
+}
+
+function derivePnl(type: string, direction: string, entryPrice: number, exitPrice: number, positionSize: number) {
+  if (!Number.isFinite(entryPrice) || !Number.isFinite(exitPrice) || !Number.isFinite(positionSize)) return null;
+  const multiplier = type === "options" ? 100 : 1;
+  const gross =
+    direction === "long"
+      ? (exitPrice - entryPrice) * positionSize * multiplier
+      : (entryPrice - exitPrice) * positionSize * multiplier;
+  return Number.parseFloat(gross.toFixed(2));
+}
+
+function deriveRrr(direction: string, entryPrice: number, stopLoss: number | null, targetPrice: number | null) {
+  if (!Number.isFinite(entryPrice) || stopLoss == null || targetPrice == null) return "";
+  const risk = direction === "long" ? entryPrice - stopLoss : stopLoss - entryPrice;
+  const reward = direction === "long" ? targetPrice - entryPrice : entryPrice - targetPrice;
+  if (risk <= 0 || reward <= 0) return "";
+  return `1:${(reward / risk).toFixed(2)}`;
+}
+
 function buildDraftFromTrade(trade: Trade): TradeDraft {
   return {
     symbol: trade.symbol || "",
     underlying: trade.underlying || "",
     type: trade.type || "",
+    direction: trade.direction || "long",
+    tradingStyle: trade.tradingStyle || "Scalping",
+    optionType: trade.optionType || "call",
+    strike: trade.strike != null ? String(trade.strike) : "",
+    positionType: trade.positionType || "",
+    stopLoss: trade.stopLoss != null ? String(trade.stopLoss) : "",
+    takeProfit: trade.takeProfit != null ? String(trade.takeProfit) : "",
     status: trade.status || "",
     date: trade.date || "",
     pnl: trade.pnl != null ? String(trade.pnl) : "",
     quantity: trade.quantity != null ? String(trade.quantity) : "",
     entryPrice: trade.entryPrice != null ? String(trade.entryPrice) : "",
     exitPrice: trade.exitPrice != null ? String(trade.exitPrice) : "",
-    commission: trade.commission != null ? String(trade.commission) : "",
-    fees: trade.fees != null ? String(trade.fees) : "",
+    emotion: trade.emotion || "Neutral",
     expiry: trade.expiry || "",
     entryTime: trade.entryTime || "",
     exitTime: trade.exitTime || "",
     rr: trade.rr || "",
-    mae: trade.mae != null ? String(trade.mae) : "",
-    mfe: trade.mfe != null ? String(trade.mfe) : "",
     journalEntry: renderJournalPreview(trade.journalEntry),
     tags: Array.isArray(trade.tags) ? [...trade.tags] : [],
     link: trade.link || "",
     imageUrls: typeof trade.imageUrls === "string" ? JSON.parse(trade.imageUrls || "[]") : trade.imageUrls || [],
   };
+}
+
+function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: DropdownOption[];
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedOption = options.find((option) => option.value === value);
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        onBlur={() => {
+          window.setTimeout(() => setOpen(false), 120);
+        }}
+        style={{
+          width: "100%",
+          background: "var(--bg-secondary)",
+          border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+          borderRadius: 12,
+          padding: "10px 12px",
+          color: "var(--text-primary)",
+          fontSize: 13,
+          outline: "none",
+          boxSizing: "border-box",
+          minHeight: 44,
+          fontFamily: "inherit",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          textAlign: "left",
+          cursor: "pointer",
+        }}
+      >
+        <span style={{ color: selectedOption ? "var(--text-primary)" : "var(--text-muted)" }}>
+          {selectedOption?.label || placeholder || "Select option"}
+        </span>
+        <ChevronDown
+          size={14}
+          color="var(--text-secondary)"
+          style={{ transform: `rotate(${open ? 180 : 0}deg)`, transition: "transform 160ms ease", flexShrink: 0 }}
+        />
+      </button>
+      {open ? (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 8px)",
+            left: 0,
+            right: 0,
+            maxHeight: 220,
+            overflowY: "auto",
+            background: "var(--bg-card)",
+            border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+            borderRadius: 14,
+            boxShadow: "0 18px 36px rgba(15,23,42,0.14)",
+            zIndex: 20,
+            padding: 6,
+          }}
+        >
+          {options.map((option) => {
+            const selected = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  onChange(option.value);
+                  setOpen(false);
+                }}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  border: "none",
+                  background: selected ? "color-mix(in srgb, var(--accent-green) 10%, var(--bg-secondary))" : "transparent",
+                  color: "var(--text-primary)",
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  fontSize: 14,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function SectionCard({
@@ -131,7 +400,7 @@ function SectionCard({
   return (
     <section
       style={{
-        background: "linear-gradient(180deg, color-mix(in srgb, var(--bg-card) 96%, white 4%) 0%, var(--bg-card) 100%)",
+        background: "var(--bg-card)",
         border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
         borderRadius: 18,
         padding: 16,
@@ -198,6 +467,7 @@ export default function TradePanel({ trade, onClose }: Props) {
   const [draft, setDraft] = useState<TradeDraft | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isSymbolMenuOpen, setIsSymbolMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!trade) return;
@@ -216,16 +486,69 @@ export default function TradePanel({ trade, onClose }: Props) {
 
   const viewJournal = useMemo(() => renderJournalPreview(trade?.journalEntry), [trade?.journalEntry]);
   const isWin = (trade?.pnl ?? 0) >= 0;
+  const currentTrade = trade;
+  const currentDraft = draft ?? EMPTY_DRAFT;
+  const draftEntry = Number.parseFloat(currentDraft.entryPrice);
+  const draftExit = Number.parseFloat(currentDraft.exitPrice);
+  const draftSize = Number.parseFloat(currentDraft.quantity);
+  const draftStopLoss = currentDraft.stopLoss === "" ? null : Number.parseFloat(currentDraft.stopLoss);
+  const draftTakeProfit = currentDraft.takeProfit === "" ? null : Number.parseFloat(currentDraft.takeProfit);
+  const draftLivePnl = useMemo(
+    () => derivePnl(currentDraft.type, currentDraft.direction, draftEntry, draftExit, draftSize),
+    [currentDraft.direction, currentDraft.type, draftEntry, draftExit, draftSize],
+  );
+  const draftLiveRrr = useMemo(
+    () => deriveRrr(currentDraft.direction, draftEntry, draftStopLoss, draftTakeProfit ?? (Number.isFinite(draftExit) ? draftExit : null)),
+    [currentDraft.direction, draftEntry, draftExit, draftStopLoss, draftTakeProfit],
+  );
+  const draftDerivedResult = useMemo(() => {
+    if (draftLivePnl == null) return "Unknown";
+    if (draftLivePnl > 0) return "Win";
+    if (draftLivePnl < 0) return "Loss";
+    return "Breakeven";
+  }, [draftLivePnl]);
+  const tradeTypeOptions = useMemo<DropdownOption[]>(
+    () => TRADE_TYPE_OPTIONS.map((option) => ({ value: option.value, label: option.label })),
+    [],
+  );
+  const tradingStyleOptions = useMemo<DropdownOption[]>(
+    () => TRADING_STYLE_OPTIONS.map((option) => ({ value: option, label: option })),
+    [],
+  );
+  const positionTypeOptions = useMemo<DropdownOption[]>(
+    () => Object.entries(POSITION_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+    [],
+  );
+  const emotionOptions = useMemo<DropdownOption[]>(
+    () => EMOTION_OPTIONS.map((option) => ({ value: option, label: option })),
+    [],
+  );
+  const optionTypeOptions = useMemo<DropdownOption[]>(
+    () => OPTION_TYPE_OPTIONS.map((option) => ({ value: option.value, label: option.label })),
+    [],
+  );
+  const symbolOptions = useMemo(() => SYMBOL_OPTIONS_BY_TRADE[currentDraft.type] || [], [currentDraft.type]);
+  const normalizedSymbol = currentDraft.symbol.trim();
+  const filteredSymbolOptions = useMemo(() => {
+    const query = normalizedSymbol.toLowerCase();
+    if (!query) return symbolOptions;
+    return symbolOptions.filter((option) => option.toLowerCase().includes(query));
+  }, [normalizedSymbol, symbolOptions]);
+
+  useEffect(() => {
+    if (!draft) return;
+    const next = POSITION_TYPE_BY_TRADE[draft.type];
+    if (next && !draft.positionType) {
+      setDraft((current) => (current ? { ...current, positionType: next } : current));
+    }
+  }, [draft]);
 
   if (!trade || !draft) return null;
-  const currentTrade = trade;
-  const currentDraft = draft;
 
   const panelBackground = "var(--bg-card)";
   const textPrimary = "var(--text-primary)";
   const textSecondary = "var(--text-secondary)";
   const textMuted = "var(--text-muted)";
-  const accentSoft = "rgba(139,92,246,0.14)";
   const positive = "var(--accent-green)";
   const negative = "var(--accent-red)";
   const primaryButtonStyle: React.CSSProperties = {
@@ -328,20 +651,24 @@ export default function TradePanel({ trade, onClose }: Props) {
         symbol: currentDraft.symbol.trim() || currentTrade.symbol,
         underlying: currentDraft.underlying.trim() || currentTrade.underlying,
         type: currentDraft.type.trim() || currentTrade.type,
-        status: currentTrade.status,
+        status: draftLivePnl == null ? currentTrade.status : draftLivePnl > 0 ? "win" : draftLivePnl < 0 ? "loss" : "breakeven",
+        direction: currentDraft.direction.trim() || currentTrade.direction,
+        tradingStyle: currentDraft.tradingStyle.trim() || currentTrade.tradingStyle,
+        optionType: currentDraft.optionType.trim() || null,
+        strike: currentDraft.strike !== "" ? parseFloat(currentDraft.strike) : null,
+        positionType: currentDraft.positionType.trim() || null,
         date: currentDraft.date.trim() || currentTrade.date,
-        pnl: currentTrade.pnl,
+        pnl: draftLivePnl ?? currentTrade.pnl,
         quantity: currentDraft.quantity !== "" ? parseFloat(currentDraft.quantity) : currentTrade.quantity,
         entryPrice: currentDraft.entryPrice !== "" ? parseFloat(currentDraft.entryPrice) : currentTrade.entryPrice,
         exitPrice: currentDraft.exitPrice !== "" ? parseFloat(currentDraft.exitPrice) : currentTrade.exitPrice,
-        commission: currentDraft.commission !== "" ? parseFloat(currentDraft.commission) : currentTrade.commission,
-        fees: currentDraft.fees !== "" ? parseFloat(currentDraft.fees) : currentTrade.fees,
+        stopLoss: currentDraft.stopLoss !== "" ? parseFloat(currentDraft.stopLoss) : null,
+        takeProfit: currentDraft.takeProfit !== "" ? parseFloat(currentDraft.takeProfit) : null,
+        emotion: currentDraft.emotion.trim() || null,
         expiry: currentDraft.expiry.trim() || null,
         entryTime: convertFromPickerValue(currentDraft.entryTime) || null,
         exitTime: convertFromPickerValue(currentDraft.exitTime) || null,
-        rr: currentDraft.rr.trim() || null,
-        mae: currentDraft.mae !== "" ? parseFloat(currentDraft.mae) : null,
-        mfe: currentDraft.mfe !== "" ? parseFloat(currentDraft.mfe) : null,
+        rr: draftLiveRrr || null,
         journalEntry: currentDraft.journalEntry.trim() || undefined,
         tags: currentDraft.tags,
         link: currentDraft.link.trim() || null,
@@ -358,17 +685,7 @@ export default function TradePanel({ trade, onClose }: Props) {
 
   return (
     <>
-      <div
-        onClick={onClose}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "color-mix(in srgb, var(--bg-primary) 78%, transparent)",
-          backdropFilter: "blur(4px)",
-          WebkitBackdropFilter: "blur(4px)",
-          zIndex: 180,
-        }}
-      />
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "var(--overlay)", zIndex: 180 }} />
       
 
       <div
@@ -378,8 +695,8 @@ export default function TradePanel({ trade, onClose }: Props) {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "88vw",
-          maxWidth: "56rem",
+          width: isMobile ? "100vw" : "min(1040px, 94vw)",
+          maxWidth: "none",
           height: "90vh",
           background: panelBackground,
           border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
@@ -512,56 +829,58 @@ export default function TradePanel({ trade, onClose }: Props) {
         <div style={{ flex: 1, overflowY: "auto", padding: "18px 20px 22px", display: "grid", gap: 16 }}>
           {!isEditing ? (
             <>
-              <SectionCard title="Trade Overview">
+              <SectionCard title="Trade Setup">
                 <ValueGrid
-                  columns={isMobile ? "1fr 1fr" : "repeat(3, minmax(0, 1fr))"}
+                  columns={isMobile ? "1fr 1fr" : "repeat(4, minmax(0, 1fr))"}
                   items={[
-                    { label: "Symbol", value: emptyValue(trade.underlying), tone: textPrimary },
-                    { label: "Ticker", value: emptyValue(trade.symbol), tone: textPrimary },
-                    { label: "Asset Type", value: emptyValue(trade.type), tone: "#93c5fd" },
-                    { label: "Result", value: emptyValue(trade.status).toUpperCase(), tone: isWin ? positive : negative },
+                    { label: "Trade Type", value: emptyValue(trade.type), tone: textPrimary },
+                    { label: "Symbol / Pair", value: emptyValue(trade.symbol), tone: textPrimary },
+                    { label: "Direction", value: emptyValue(trade.direction), tone: textPrimary },
+                    { label: "Trading Style", value: emptyValue(trade.tradingStyle), tone: textPrimary },
+                    { label: "Entry Price", value: formatMoney(trade.entryPrice), tone: textPrimary },
+                    { label: "Exit Price", value: formatMoney(trade.exitPrice), tone: textPrimary },
+                    { label: "Stop Loss", value: formatMoney(trade.stopLoss), tone: textPrimary },
+                    { label: "Take Profit", value: formatMoney(trade.takeProfit), tone: textPrimary },
+                    { label: "Position Type", value: emptyValue(trade.positionType), tone: textPrimary },
+                    { label: "Position Size", value: emptyValue(trade.quantity), tone: textPrimary },
+                    { label: "Emotion", value: emptyValue(trade.emotion), tone: textPrimary },
                     { label: "Trade Date", value: formatDate(trade.date), tone: textPrimary },
-                    { label: "Net P&L", value: formatMoney(trade.pnl), tone: isWin ? positive : negative },
+                    { label: "Entry Date & Time", value: formatDateTimeAmPm(trade.date, trade.entryTime), tone: textPrimary },
+                    { label: "Exit Date & Time", value: formatDateTimeAmPm(trade.date, trade.exitTime), tone: textPrimary },
+                    { label: "Profit & Loss", value: formatMoney(trade.pnl), tone: isWin ? positive : negative },
+                    { label: "Risk : Reward", value: emptyValue(trade.rr), tone: textPrimary },
                   ]}
                 />
               </SectionCard>
 
-              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
-                <SectionCard title="Execution">
+              {trade.type === "options" ? (
+                <SectionCard title="Option Details">
                   <ValueGrid
-                    columns={isMobile ? "1fr 1fr" : "repeat(3, minmax(0, 1fr))"}
+                    columns={isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))"}
                     items={[
-                      { label: "Entry", value: formatMoney(trade.entryPrice), tone: textPrimary },
-                      { label: "Exit", value: formatMoney(trade.exitPrice), tone: textPrimary },
-                      { label: "Qty", value: emptyValue(trade.quantity), tone: textPrimary },
-                      { label: "Commission", value: formatMoney(trade.commission), tone: textPrimary },
-                      { label: "Fees", value: formatMoney(trade.fees), tone: textPrimary },
+                      { label: "Option Type", value: emptyValue(trade.optionType), tone: textPrimary },
+                      { label: "Strike", value: trade.strike != null ? String(trade.strike) : "Not added", tone: textPrimary },
                       { label: "Expiry", value: emptyValue(trade.expiry), tone: textPrimary },
                     ]}
                   />
                 </SectionCard>
+              ) : null}
 
-                <SectionCard title="Time & Risk" icon={<Clock size={14} />}>
-                  <ValueGrid
-                    columns={isMobile ? "1fr" : "1fr 1fr"}
-                    items={[
-                      { label: "Entry Date / Time", value: formatDateTime(trade.date, trade.entryTime), tone: textPrimary },
-                      { label: "Exit Date / Time", value: formatDateTime(trade.date, trade.exitTime), tone: textPrimary },
-                      { label: "R:R Ratio", value: emptyValue(trade.rr), tone: "#c4b5fd" },
-                      { label: "MAE", value: trade.mae != null ? String(trade.mae) : "Not added", tone: textPrimary },
-                      { label: "MFE", value: trade.mfe != null ? String(trade.mfe) : "Not added", tone: textPrimary },
-                    ]}
-                  />
-                </SectionCard>
-              </div>
-
-              <SectionCard title="Journal Preview">
-                <div style={{ color: viewJournal ? textSecondary : textMuted, fontSize: 13, lineHeight: 1.7 }}>
+              <SectionCard title="Journal Notes">
+                <div
+                  style={{
+                    ...inputStyle,
+                    minHeight: 118,
+                    lineHeight: 1.6,
+                    display: "block",
+                    color: viewJournal ? textSecondary : textMuted,
+                  }}
+                >
                   {viewJournal || "Not added"}
                 </div>
               </SectionCard>
 
-              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
                 <SectionCard title="Tags">
                   {trade.tags && trade.tags.length > 0 ? (
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -586,16 +905,6 @@ export default function TradePanel({ trade, onClose }: Props) {
                     <div style={{ color: textMuted, fontSize: 13 }}>Not added</div>
                   )}
                 </SectionCard>
-
-                <SectionCard title="Chart Link" icon={<LinkIcon size={14} />}>
-                  {trade.link ? (
-                    <a href={trade.link} target="_blank" rel="noreferrer" style={{ color: "#93c5fd", fontSize: 13, textDecoration: "none", wordBreak: "break-all" }}>
-                      {trade.link}
-                    </a>
-                  ) : (
-                    <div style={{ color: textMuted, fontSize: 13 }}>Not added</div>
-                  )}
-                </SectionCard>
               </div>
 
               <SectionCard title="Screenshots" icon={<Image size={14} />}>
@@ -608,55 +917,291 @@ export default function TradePanel({ trade, onClose }: Props) {
                     ))}
                   </div>
                 ) : (
-                  <div style={{ color: textMuted, fontSize: 13 }}>Not added</div>
+                  <div style={{ ...inputStyle, color: textMuted, marginBottom: 10 }}>No screenshots attached.</div>
                 )}
               </SectionCard>
             </>
           ) : (
             <>
-              <SectionCard title="Trade Overview">
-                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))", gap: 12 }}>
+              <SectionCard title="Trade Setup">
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(4, minmax(0, 1fr))", gap: 12 }}>
                   <div>
-                    <FieldLabel>Symbol</FieldLabel>
-                    <input value={draft.underlying} onChange={(e) => updateDraft("underlying", e.target.value)} style={inputStyle} />
+                    <FieldLabel>Trade Type</FieldLabel>
+                    <CustomSelect value={draft.type} onChange={(value) => updateDraft("type", value)} options={tradeTypeOptions} />
                   </div>
                   <div>
-                    <FieldLabel>Ticker</FieldLabel>
-                    <input value={draft.symbol} onChange={(e) => updateDraft("symbol", e.target.value)} style={inputStyle} />
+                    <FieldLabel>Symbol / Pair</FieldLabel>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        value={draft.symbol}
+                        onChange={(e) => {
+                          updateDraft("symbol", e.target.value);
+                          setIsSymbolMenuOpen(true);
+                        }}
+                        onFocus={() => setIsSymbolMenuOpen(true)}
+                        onBlur={() => {
+                          window.setTimeout(() => setIsSymbolMenuOpen(false), 120);
+                        }}
+                        placeholder="Select or enter a symbol"
+                        style={{ ...inputStyle, paddingRight: 36 }}
+                      />
+                      <ChevronDown
+                        size={14}
+                        color="var(--text-secondary)"
+                        style={{
+                          position: "absolute",
+                          right: "12px",
+                          top: "50%",
+                          transform: `translateY(-50%) rotate(${isSymbolMenuOpen ? 180 : 0}deg)`,
+                          pointerEvents: "none",
+                          transition: "transform 160ms ease",
+                        }}
+                      />
+                      {isSymbolMenuOpen ? (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "calc(100% + 8px)",
+                            left: 0,
+                            right: 0,
+                            maxHeight: 220,
+                            overflowY: "auto",
+                            background: "var(--bg-card)",
+                            border: "1px solid color-mix(in srgb, var(--border) 88%, transparent)",
+                            borderRadius: 14,
+                            boxShadow: "0 18px 36px rgba(15,23,42,0.14)",
+                            zIndex: 20,
+                            padding: 6,
+                          }}
+                        >
+                          {filteredSymbolOptions.length > 0 ? (
+                            filteredSymbolOptions.map((option) => (
+                              <button
+                                key={option}
+                                type="button"
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  updateDraft("symbol", option);
+                                  setIsSymbolMenuOpen(false);
+                                }}
+                                style={{
+                                  width: "100%",
+                                  textAlign: "left",
+                                  border: "none",
+                                  background: option === draft.symbol ? "color-mix(in srgb, var(--accent-green) 10%, var(--bg-secondary))" : "transparent",
+                                  color: "var(--text-primary)",
+                                  padding: "10px 12px",
+                                  borderRadius: 10,
+                                  fontSize: 14,
+                                  cursor: "pointer",
+                                  fontFamily: "inherit",
+                                }}
+                              >
+                                {option}
+                              </button>
+                            ))
+                          ) : (
+                            <div
+                              style={{
+                                padding: "10px 12px",
+                                borderRadius: 10,
+                                color: "var(--text-secondary)",
+                                fontSize: 13,
+                              }}
+                            >
+                              Use custom symbol: {normalizedSymbol || "Type a symbol"}
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                   <div>
-                    <FieldLabel>Asset Type</FieldLabel>
-                    <input value={draft.type} onChange={(e) => updateDraft("type", e.target.value)} style={inputStyle} />
+                    <FieldLabel>Direction</FieldLabel>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      {DIRECTION_OPTIONS.map((option) => {
+                        const selected = draft.direction === option.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => updateDraft("direction", option.value)}
+                            style={{
+                              ...inputStyle,
+                              minHeight: 44,
+                              padding: "10px 12px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 700,
+                              textTransform: "capitalize",
+                              cursor: "pointer",
+                              background: selected ? option.value === "long" ? "rgba(0,229,122,0.08)" : "rgba(255,77,106,0.08)" : "var(--bg-secondary)",
+                              color: selected ? option.value === "long" ? "var(--accent-green)" : "var(--accent-red)" : "var(--text-primary)",
+                              borderColor: selected ? option.value === "long" ? "color-mix(in srgb, var(--accent-green) 32%, var(--border))" : "color-mix(in srgb, var(--accent-red) 32%, var(--border))" : "color-mix(in srgb, var(--border) 88%, transparent)",
+                            }}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div>
-                    <FieldLabel>Trade Date</FieldLabel>
-                    <input type="date" value={convertToPickerValue(draft.date)} onChange={(e) => updateDraft("date", convertFromPickerValue(e.target.value))} style={inputStyle} />
+                    <FieldLabel>Trading Style</FieldLabel>
+                    <CustomSelect value={draft.tradingStyle} onChange={(value) => updateDraft("tradingStyle", value)} options={tradingStyleOptions} />
+                  </div>
+                  <div>
+                    <FieldLabel>Entry Price</FieldLabel>
+                    <input type="number" step="0.01" value={draft.entryPrice} onChange={(e) => updateDraft("entryPrice", e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <FieldLabel>Exit Price</FieldLabel>
+                    <input type="number" step="0.01" value={draft.exitPrice} onChange={(e) => updateDraft("exitPrice", e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <FieldLabel>Stop Loss</FieldLabel>
+                    <input type="number" step="0.01" value={draft.stopLoss} onChange={(e) => updateDraft("stopLoss", e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <FieldLabel>Take Profit</FieldLabel>
+                    <input type="number" step="0.01" value={draft.takeProfit} onChange={(e) => updateDraft("takeProfit", e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <FieldLabel>Position Type</FieldLabel>
+                    <CustomSelect value={draft.positionType} onChange={(value) => updateDraft("positionType", value)} options={positionTypeOptions} />
+                  </div>
+                  <div>
+                    <FieldLabel>Position Size</FieldLabel>
+                    <input type="number" step="0.01" value={draft.quantity} onChange={(e) => updateDraft("quantity", e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <FieldLabel>Risk : Reward</FieldLabel>
+                    <div
+                      className="num-tabular"
+                      style={{
+                        ...inputStyle,
+                        minHeight: 44,
+                        display: "flex",
+                        alignItems: "center",
+                        fontSize: 14,
+                        fontWeight: draftLiveRrr ? 700 : 500,
+                        color: draftLiveRrr ? textPrimary : textMuted,
+                        background: draftLiveRrr ? "color-mix(in srgb, var(--accent-green) 5%, var(--bg-secondary))" : "var(--bg-secondary)",
+                        borderColor: draftLiveRrr ? "color-mix(in srgb, var(--accent-green) 22%, var(--border))" : "color-mix(in srgb, var(--border) 88%, transparent)",
+                      }}
+                    >
+                      {draftLiveRrr || "N/A"}
+                    </div>
+                  </div>
+                  <div>
+                    <FieldLabel>Emotion</FieldLabel>
+                    <CustomSelect value={draft.emotion} onChange={(value) => updateDraft("emotion", value)} options={emotionOptions} />
+                  </div>
+                  <div>
+                    <FieldLabel>Entry Date & Time</FieldLabel>
+                    <input type="datetime-local" value={draft.entryTime ? `${convertToPickerValue(draft.date)}T${convertToPickerValue(draft.entryTime)}` : `${convertToPickerValue(draft.date)}T`} onChange={(e) => {
+                      const [nextDate, nextTime] = e.target.value.split("T");
+                      updateDraft("date", convertFromPickerValue(nextDate || ""));
+                      updateDraft("entryTime", convertFromPickerValue(nextTime || ""));
+                    }} style={inputStyle} />
+                  </div>
+                  <div>
+                    <FieldLabel>Exit Date & Time</FieldLabel>
+                    <input type="datetime-local" value={draft.exitTime ? `${convertToPickerValue(draft.date)}T${convertToPickerValue(draft.exitTime)}` : `${convertToPickerValue(draft.date)}T`} onChange={(e) => {
+                      const [nextDate, nextTime] = e.target.value.split("T");
+                      updateDraft("date", convertFromPickerValue(nextDate || ""));
+                      updateDraft("exitTime", convertFromPickerValue(nextTime || ""));
+                    }} style={inputStyle} />
+                  </div>
+                  <div>
+                    <FieldLabel>Profit &amp; Loss</FieldLabel>
+                    <div
+                      className="num-tabular"
+                      style={{
+                        ...inputStyle,
+                        minHeight: 44,
+                        display: "flex",
+                        alignItems: "center",
+                        fontSize: 14,
+                        fontWeight: draftLivePnl == null ? 500 : 700,
+                        color:
+                          draftLivePnl == null
+                            ? textMuted
+                            : draftLivePnl > 0
+                              ? positive
+                              : draftLivePnl < 0
+                                ? negative
+                                : textPrimary,
+                        background:
+                          draftLivePnl == null
+                            ? "var(--bg-secondary)"
+                            : draftLivePnl > 0
+                              ? "rgba(0,229,122,0.06)"
+                              : draftLivePnl < 0
+                                ? "rgba(255,77,106,0.06)"
+                                : "var(--bg-secondary)",
+                        borderColor:
+                          draftLivePnl == null
+                            ? "color-mix(in srgb, var(--border) 88%, transparent)"
+                            : draftLivePnl > 0
+                              ? "color-mix(in srgb, var(--accent-green) 32%, var(--border))"
+                              : draftLivePnl < 0
+                                ? "color-mix(in srgb, var(--accent-red) 32%, var(--border))"
+                                : "color-mix(in srgb, var(--border) 88%, transparent)",
+                      }}
+                    >
+                      {draftLivePnl == null ? "$0.00" : `${draftLivePnl >= 0 ? "+" : "-"}$${Math.abs(draftLivePnl).toFixed(2)}`}
+                    </div>
+                  </div>
+                  <div>
+                    <FieldLabel>Result</FieldLabel>
+                    <div
+                      style={{
+                        ...inputStyle,
+                        minHeight: 44,
+                        display: "flex",
+                        alignItems: "center",
+                        fontSize: 14,
+                        fontWeight: draftDerivedResult === "Unknown" ? 500 : 700,
+                        color:
+                          draftDerivedResult === "Win"
+                            ? positive
+                            : draftDerivedResult === "Loss"
+                              ? negative
+                              : draftDerivedResult === "Unknown"
+                                ? textMuted
+                                : textPrimary,
+                        background:
+                          draftDerivedResult === "Win"
+                            ? "rgba(0,229,122,0.06)"
+                            : draftDerivedResult === "Loss"
+                              ? "rgba(255,77,106,0.06)"
+                              : "var(--bg-secondary)",
+                        borderColor:
+                          draftDerivedResult === "Win"
+                            ? "color-mix(in srgb, var(--accent-green) 32%, var(--border))"
+                            : draftDerivedResult === "Loss"
+                              ? "color-mix(in srgb, var(--accent-red) 32%, var(--border))"
+                              : "color-mix(in srgb, var(--border) 88%, transparent)",
+                      }}
+                    >
+                      {draftDerivedResult}
+                    </div>
                   </div>
                 </div>
               </SectionCard>
 
-              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
-                <SectionCard title="Execution">
-                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
+              {draft.type === "options" ? (
+                <SectionCard title="Option Details">
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))", gap: 12 }}>
                     <div>
-                      <FieldLabel>Quantity</FieldLabel>
-                      <input type="number" step="0.01" value={draft.quantity} onChange={(e) => updateDraft("quantity", e.target.value)} style={inputStyle} />
+                      <FieldLabel>Option Type</FieldLabel>
+                      <CustomSelect value={draft.optionType} onChange={(value) => updateDraft("optionType", value)} options={optionTypeOptions} />
                     </div>
                     <div>
-                      <FieldLabel>Entry Price</FieldLabel>
-                      <input type="number" step="0.01" value={draft.entryPrice} onChange={(e) => updateDraft("entryPrice", e.target.value)} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>Exit Price</FieldLabel>
-                      <input type="number" step="0.01" value={draft.exitPrice} onChange={(e) => updateDraft("exitPrice", e.target.value)} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>Commission</FieldLabel>
-                      <input type="number" step="0.01" value={draft.commission} onChange={(e) => updateDraft("commission", e.target.value)} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>Fees</FieldLabel>
-                      <input type="number" step="0.01" value={draft.fees} onChange={(e) => updateDraft("fees", e.target.value)} style={inputStyle} />
+                      <FieldLabel>Strike</FieldLabel>
+                      <input type="number" step="0.01" value={draft.strike} onChange={(e) => updateDraft("strike", e.target.value)} style={inputStyle} />
                     </div>
                     <div>
                       <FieldLabel>Expiry</FieldLabel>
@@ -664,52 +1209,15 @@ export default function TradePanel({ trade, onClose }: Props) {
                     </div>
                   </div>
                 </SectionCard>
+              ) : null}
 
-                <SectionCard title="Time & Risk" icon={<TrendingUp size={14} />}>
-                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <FieldLabel>Entry Date</FieldLabel>
-                      <input type="date" value={convertToPickerValue(draft.date)} onChange={(e) => updateDraft("date", convertFromPickerValue(e.target.value))} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>Entry Time</FieldLabel>
-                      <input type="time" value={convertToPickerValue(draft.entryTime)} onChange={(e) => updateDraft("entryTime", convertFromPickerValue(e.target.value))} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>Exit Date</FieldLabel>
-                      <input type="date" value={convertToPickerValue(draft.date)} onChange={(e) => updateDraft("date", convertFromPickerValue(e.target.value))} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>Exit Time</FieldLabel>
-                      <input type="time" value={convertToPickerValue(draft.exitTime)} onChange={(e) => updateDraft("exitTime", convertFromPickerValue(e.target.value))} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>R:R Ratio</FieldLabel>
-                      <input value={draft.rr} onChange={(e) => updateDraft("rr", e.target.value)} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>MAE</FieldLabel>
-                      <input type="number" step="0.01" value={draft.mae} onChange={(e) => updateDraft("mae", e.target.value)} style={inputStyle} />
-                    </div>
-                    <div>
-                      <FieldLabel>MFE</FieldLabel>
-                      <input type="number" step="0.01" value={draft.mfe} onChange={(e) => updateDraft("mfe", e.target.value)} style={inputStyle} />
-                    </div>
-                  </div>
-                </SectionCard>
-              </div>
-
-              <SectionCard title="Journal Preview">
-                <textarea value={draft.journalEntry} onChange={(e) => updateDraft("journalEntry", e.target.value)} style={textAreaStyle} />
+              <SectionCard title="Journal Notes">
+                <textarea value={draft.journalEntry} onChange={(e) => updateDraft("journalEntry", e.target.value)} style={{ ...textAreaStyle, minHeight: 118 }} />
               </SectionCard>
 
-              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
                 <SectionCard title="Tags">
                   <TagSelector selected={draft.tags} onChange={(next) => updateDraft("tags", next)} maxHeight={200} />
-                </SectionCard>
-
-                <SectionCard title="Chart Link" icon={<LinkIcon size={14} />}>
-                  <input type="url" value={draft.link} onChange={(e) => updateDraft("link", e.target.value)} style={inputStyle} />
                 </SectionCard>
               </div>
 
@@ -742,7 +1250,7 @@ export default function TradePanel({ trade, onClose }: Props) {
                     ))}
                   </div>
                 ) : (
-                  <div style={{ color: textMuted, fontSize: 13, marginBottom: 10 }}>No screenshots attached.</div>
+                  <div style={{ ...inputStyle, color: textMuted, marginBottom: 10 }}>No screenshots attached.</div>
                 )}
                 <label
                   style={{
@@ -752,12 +1260,13 @@ export default function TradePanel({ trade, onClose }: Props) {
                     gap: 8,
                     padding: "12px 14px",
                     borderRadius: 12,
-                    border: "1px dashed rgba(148,163,184,0.22)",
-                    background: "rgba(15,23,42,0.42)",
+                    border: "1px dashed color-mix(in srgb, var(--border) 82%, transparent)",
+                    background: "var(--bg-secondary)",
                     color: textSecondary,
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 color-mix(in srgb, white 10%, transparent)",
                   }}
                 >
                   <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ display: "none" }} />

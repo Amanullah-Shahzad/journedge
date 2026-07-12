@@ -43,8 +43,10 @@ def list_trades(accountId: str | None = Query(default=None), db: Session = Depen
 def create_trades(payload: dict, db: Session = Depends(get_db), user=Depends(get_current_user)) -> dict:
     body = TradeBulkCreate.model_validate(payload)
     resolved_account_id = validate_user_account_id(db, user, body.account_id)
+    created_trades: list[Trade] = []
     for trade_payload in body.trades:
         trade = upsert_trade(db, user, trade_payload.model_dump(by_alias=True), account_id=resolved_account_id)
+        created_trades.append(trade)
         audit_and_log(
             db,
             event_logger=logger,
@@ -56,7 +58,9 @@ def create_trades(payload: dict, db: Session = Depends(get_db), user=Depends(get
             message="Trade created",
         )
     db.commit()
-    return {"success": True}
+    for trade in created_trades:
+        db.refresh(trade)
+    return {"success": True, "trades": [serialize_trade(trade) for trade in created_trades]}
 
 
 @router.patch("")
