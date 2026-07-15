@@ -486,7 +486,6 @@ export default function TradePanel({ trade, onClose }: Props) {
 
   const viewJournal = useMemo(() => renderJournalPreview(trade?.journalEntry), [trade?.journalEntry]);
   const isWin = (trade?.pnl ?? 0) >= 0;
-  const currentTrade = trade;
   const currentDraft = draft ?? EMPTY_DRAFT;
   const draftEntry = Number.parseFloat(currentDraft.entryPrice);
   const draftExit = Number.parseFloat(currentDraft.exitPrice);
@@ -544,6 +543,7 @@ export default function TradePanel({ trade, onClose }: Props) {
   }, [draft]);
 
   if (!trade || !draft) return null;
+  const currentTrade = trade;
 
   const panelBackground = "var(--bg-card)";
   const textPrimary = "var(--text-primary)";
