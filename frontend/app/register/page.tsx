@@ -3,7 +3,18 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, EyeOff, Search } from "lucide-react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Globe2,
+  Lock,
+  Mail,
+  Search,
+  User,
+} from "lucide-react";
 
 import { useRegisterMutation } from "@/lib/api/auth";
 
@@ -13,35 +24,98 @@ import { COUNTRIES } from "../lib/countries";
 const TRADING_EXPERIENCE = ["Beginner", "Intermediate", "Advanced", "Professional"] as const;
 const PREFERRED_MARKETS = ["All markets", "Forex", "Crypto", "Stocks", "Options", "Futures", "Commodities"] as const;
 
-const fieldStyle: React.CSSProperties = {
-  width: "100%",
-  background: "color-mix(in srgb, var(--bg-card) 96%, white 4%)",
-  border: "1px solid color-mix(in srgb, var(--border) 72%, transparent)",
-  borderRadius: 16,
-  padding: "12px 14px",
-  color: "var(--text-primary)",
-  fontFamily: "inherit",
-  outline: "none",
-  transition: "border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
-  minHeight: 48,
-  fontSize: 14,
+type RegisterErrors = Partial<
+  Record<
+    "fullName" | "email" | "password" | "confirmPassword" | "tradingExperience" | "preferredMarket" | "country",
+    string
+  >
+>;
+
+const panelStyle: React.CSSProperties = {
+  width: "min(100%, 500px)",
+  borderRadius: 34,
+  border: "1px solid rgba(132, 181, 255, 0.56)",
+  background:
+    "linear-gradient(180deg, rgba(6, 12, 34, 0.96) 0%, rgba(6, 10, 28, 0.97) 100%)",
+  boxShadow:
+    "0 0 0 1px rgba(173, 213, 255, 0.08), 0 30px 90px rgba(4, 10, 30, 0.52), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 38px rgba(79, 132, 255, 0.16)",
+  position: "relative",
+  overflow: "hidden",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
 };
 
-const buttonStyle: React.CSSProperties = {
-  width: "100%",
-  minHeight: 52,
-  border: "none",
+const labelStyle: React.CSSProperties = {
+  color: "#f8fafc",
+  fontSize: 13,
+  fontWeight: 700,
+  letterSpacing: "-0.01em",
+};
+
+const inputShellStyle: React.CSSProperties = {
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  minHeight: 42,
   borderRadius: 16,
-  padding: "0 16px",
-  background: "linear-gradient(180deg, #3b82f6 0%, #2f5fe2 100%)",
+  border: "1px solid rgba(130, 154, 255, 0.32)",
+  background: "linear-gradient(180deg, rgba(22, 30, 74, 0.68), rgba(15, 22, 58, 0.74))",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 28px rgba(10, 18, 48, 0.26)",
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: 42,
+  padding: "0 12px 0 42px",
+  border: "none",
+  outline: "none",
+  background: "transparent",
+  color: "#f8fafc",
+  fontSize: 13,
+  fontFamily: "inherit",
+};
+
+const iconWrapStyle: React.CSSProperties = {
+  position: "absolute",
+  left: 14,
+  top: "50%",
+  transform: "translateY(-50%)",
+  color: "rgba(183, 198, 255, 0.92)",
+  pointerEvents: "none",
+  width: 18,
+  height: 18,
+  display: "grid",
+  placeItems: "center",
+};
+
+const actionButtonStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: 46,
+  borderRadius: 18,
+  border: "1px solid rgba(146, 173, 255, 0.62)",
+  background:
+    "linear-gradient(90deg, #6945ff 0%, #4d63ff 26%, #2fa7ff 70%, #49ddff 100%)",
   color: "#ffffff",
+  fontSize: 15,
   fontWeight: 800,
   fontFamily: "inherit",
   cursor: "pointer",
-  boxShadow: "0 18px 34px rgba(47,95,226,0.28)",
+  boxShadow:
+    "0 22px 44px rgba(49, 99, 255, 0.28), inset 0 1px 0 rgba(255,255,255,0.28)",
 };
 
-type RegisterErrors = Partial<Record<"fullName" | "email" | "password" | "confirmPassword" | "tradingExperience" | "preferredMarket" | "country", string>>;
+function renderInputShell(
+  icon: React.ReactNode,
+  children: React.ReactNode,
+  extraStyle?: React.CSSProperties,
+) {
+  return (
+    <div style={{ ...inputShellStyle, ...extraStyle }}>
+      <span style={iconWrapStyle}>{icon}</span>
+      {children}
+    </div>
+  );
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -61,7 +135,10 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const countryRef = useRef<HTMLLabelElement | null>(null);
 
-  const helperCopy = useMemo(() => "Create your AsaanJournal account to import trades, keep notes, and review performance in one place.", []);
+  const helperCopy = useMemo(
+    () => "Create your AsaanJournal account to import trades, keep notes, and review performance in one place.",
+    [],
+  );
 
   const filteredCountries = useMemo(() => {
     const query = countryQuery.trim().toLowerCase();
@@ -100,382 +177,521 @@ export default function RegisterPage() {
 
   function renderError(message?: string) {
     if (!message) return null;
-    return <div style={{ color: "#ff8ca0", fontSize: 12, lineHeight: 1.45, marginTop: 6 }}>{message}</div>;
+    return (
+      <div style={{ color: "#ffb2c5", fontSize: 12, lineHeight: 1.45, marginTop: 6 }}>
+        {message}
+      </div>
+    );
   }
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: "radial-gradient(circle at top left, rgba(6,78,59,0.28) 0%, rgba(6,78,59,0) 28%), linear-gradient(180deg, #07140f 0%, #0b1020 42%, #0f172a 100%)",
+        position: "relative",
+        overflow: "hidden",
         display: "grid",
         placeItems: "center",
-        padding: "20px",
+        padding: "24px 18px",
+        background:
+          "radial-gradient(circle at 18% 18%, rgba(22, 123, 255, 0.18), transparent 22%), radial-gradient(circle at 82% 42%, rgba(153, 64, 255, 0.14), transparent 18%), linear-gradient(180deg, #030818 0%, #040717 100%)",
       }}
     >
-      <style>{`
-        .register-shell {
-          width: min(1040px, 100%);
-          display: grid;
-          border-radius: 22px;
-          overflow: hidden;
-          box-shadow: 0 24px 60px rgba(2,6,23,0.34);
-          background: #ffffff;
-        }
-        .register-left {
-          background: linear-gradient(180deg, #2557cf 0%, #21479d 48%, #123528 100%);
-          color: #ffffff;
-          padding: 28px 24px 18px;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          gap: 4px;
-        }
-        .register-right {
-          background: color-mix(in srgb, var(--bg-card) 96%, white 4%);
-          padding: 22px 24px 16px;
-        }
-        @media (min-width: 980px) {
-          .register-shell { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); }
-        }
-      `}</style>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0 1px, transparent 1px)",
+          backgroundSize: "120px 120px",
+          opacity: 0.08,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          right: "11%",
+          top: "47%",
+          width: 26,
+          height: 26,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(172, 93, 255, 0.96) 0%, rgba(118, 68, 255, 0.28) 100%)",
+          boxShadow: "0 0 22px rgba(159, 86, 255, 0.24)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at 24% 16%, rgba(255,255,255,0.86) 0 1px, transparent 1.5px), radial-gradient(circle at 77% 10%, rgba(174, 206, 255, 0.68) 0 1px, transparent 1.5px), radial-gradient(circle at 85% 68%, rgba(255,255,255,0.74) 0 1px, transparent 1.5px), radial-gradient(circle at 14% 68%, rgba(202, 225, 255, 0.66) 0 1px, transparent 1.5px), radial-gradient(circle at 66% 28%, rgba(255,255,255,0.82) 0 1px, transparent 1.5px)",
+          pointerEvents: "none",
+          opacity: 0.9,
+        }}
+      />
 
-      <div className="register-shell">
-        <div className="register-left">
-          <div style={{ marginBottom: 8 }}>
-            <Link href="/" style={{ display: "inline-flex", alignItems: "center", textDecoration: "none" }}>
-              <BrandLogo variant="full" forceTheme="dark" width={156} height={30} alt="AsaanJournal" priority />
+      <div style={{ ...panelStyle, zIndex: 1 }}>
+        <style jsx global>{`
+          select,
+          option {
+            color-scheme: dark;
+          }
+        `}</style>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 34,
+            boxShadow:
+              "inset 0 0 0 1px rgba(193, 214, 255, 0.12), inset 0 -16px 40px rgba(137, 70, 255, 0.08)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            background:
+              "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(221, 236, 255, 0.74) 45%, rgba(255,255,255,0) 100%)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: -18,
+            left: "50%",
+            width: "72%",
+            height: 38,
+            borderRadius: "50%",
+            background: "rgba(129, 89, 255, 0.32)",
+            filter: "blur(20px)",
+            transform: "translateX(-50%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "none",
+            margin: "0 auto",
+            padding: "16px clamp(24px, 4vw, 40px) 12px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
+            <Link href="/" style={{ display: "inline-flex", textDecoration: "none" }}>
+              <BrandLogo variant="full" forceTheme="dark" width={158} height={30} alt="Asaan Journal" priority />
             </Link>
           </div>
 
-          <div style={{ marginBottom: 6 }}>
-            <h2 style={{ fontSize: "clamp(24px, 3vw, 44px)", lineHeight: 0.98, letterSpacing: "-0.06em", fontWeight: 900, margin: 0 }}>
-              Build better
-              <br />
-              trading habits.
-            </h2>
-            <p style={{ marginTop: 8, color: "rgba(255,255,255,0.88)", fontSize: 13, lineHeight: 1.65, maxWidth: 360 }}>
-              Import trades, write notes, track performance, review mistakes, and improve your trading discipline in one clean workspace.
+          <div style={{ marginBottom: 10 }}>
+            <h1
+              style={{
+                margin: 0,
+                color: "#f5f7ff",
+                fontSize: "clamp(23px, 2.8vw, 31px)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.05em",
+                fontWeight: 800,
+              }}
+            >
+              Sign Up
+            </h1>
+            <p
+              style={{
+                marginTop: 6,
+                marginBottom: 0,
+                maxWidth: 420,
+                color: "rgba(215, 223, 255, 0.72)",
+                fontSize: 13,
+                lineHeight: 1.42,
+              }}
+            >
+              {helperCopy}
             </p>
           </div>
 
-          <div
-            style={{
-              borderRadius: 18,
-              padding: 16,
-              background: "rgba(255,255,255,0.12)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
-              marginTop: 0,
-              marginBottom: 8,
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault();
+              setError("");
+              if (!validate()) return;
+
+              try {
+                const response = await registerMutation.mutateAsync({
+                  email,
+                  password,
+                  full_name: fullName.trim(),
+                  trading_experience: tradingExperience,
+                  preferred_market: preferredMarket,
+                  country,
+                });
+                router.replace(response.user.role === "admin" ? "/admin" : "/workspace");
+                router.refresh();
+              } catch (err) {
+                setError(err instanceof Error ? err.message : "Sign up failed");
+              }
             }}
+            style={{ display: "grid", gap: 7 }}
           >
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-              {[
-                { label: "P&L", value: "+$1.4K" },
-                { label: "Win rate", value: "64%" },
-                { label: "R:R", value: "1.8R" },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  style={{
-                    borderRadius: 14,
-                    padding: "10px 10px 9px",
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  <div style={{ color: "rgba(255,255,255,0.72)", fontSize: 9, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                    {item.label}
-                  </div>
-                  <div style={{ color: "#ffffff", fontSize: 16, fontWeight: 800, marginTop: 8, letterSpacing: "-0.04em" }}>
-                    {item.value}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <label style={{ display: "grid", gap: 5 }}>
+              <span style={labelStyle}>Full Name</span>
+              {renderInputShell(
+                <User size={18} />,
+                <input
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  placeholder="Your full name"
+                  autoComplete="name"
+                  style={inputStyle}
+                />,
+              )}
+              {renderError(errors.fullName)}
+            </label>
+
+            <label style={{ display: "grid", gap: 10 }}>
+              <span style={labelStyle}>Email</span>
+              {renderInputShell(
+                <Mail size={18} />,
+                <input
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  type="email"
+                  autoComplete="email"
+                  style={inputStyle}
+                />,
+              )}
+              {renderError(errors.email)}
+            </label>
+
             <div
               style={{
-                marginTop: 12,
-                height: 72,
-                borderRadius: 14,
-                padding: "10px 12px",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.06)",
-                display: "flex",
-                alignItems: "flex-end",
-                gap: 7,
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                gap: 8,
               }}
             >
-              {[22, 36, 30, 54, 42, 60, 48].map((height, index) => (
-                <div
-                  key={`${height}-${index}`}
-                  style={{
-                    flex: 1,
-                    height,
-                    borderRadius: "999px",
-                    background: index % 3 === 0 ? "rgba(255,255,255,0.76)" : "rgba(191,219,254,0.96)",
-                  }}
-                />
-              ))}
+              <label style={{ display: "grid", gap: 5, minWidth: 0 }}>
+                <span style={labelStyle}>Password</span>
+                {renderInputShell(
+                  <Lock size={18} />,
+                  <>
+                    <input
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="Create a password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      style={{ ...inputStyle, paddingRight: 54 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((current) => !current)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      style={{
+                        position: "absolute",
+                        right: 12,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: 20,
+                        height: 20,
+                        border: "none",
+                        background: "transparent",
+                        color: "rgba(183, 198, 255, 0.92)",
+                        display: "grid",
+                        placeItems: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </>,
+                )}
+                {renderError(errors.password)}
+              </label>
+
+              <label style={{ display: "grid", gap: 5, minWidth: 0 }}>
+                <span style={labelStyle}>Confirm Password</span>
+                {renderInputShell(
+                  <Lock size={18} />,
+                  <>
+                    <input
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      placeholder="Confirm password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      style={{ ...inputStyle, paddingRight: 54 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((current) => !current)}
+                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                      style={{
+                        position: "absolute",
+                        right: 12,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: 20,
+                        height: 20,
+                        border: "none",
+                        background: "transparent",
+                        color: "rgba(183, 198, 255, 0.92)",
+                        display: "grid",
+                        placeItems: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </>,
+                )}
+                {renderError(errors.confirmPassword)}
+              </label>
             </div>
-          </div>
 
-          <div style={{ display: "grid", gap: 8, marginTop: 0 }}>
-            {[
-              "Smart trading journal",
-              "Performance analytics",
-              "Notes, screenshots, and reviews",
-            ].map((item) => (
-              <div
-                key={item}
-                style={{
-                  borderRadius: 14,
-                  padding: "9px 12px",
-                  background: "rgba(255,255,255,0.12)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.96)",
-                  fontSize: 12,
-                  fontWeight: 700,
-                }}
-              >
-                ✓ {item}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="register-right">
-          <div style={{ width: "100%", maxWidth: 420, margin: "0 auto" }}>
-            <div style={{ marginBottom: 14 }}>
-              <h1 style={{ color: "var(--text-primary)", fontSize: "clamp(24px, 2.8vw, 34px)", fontWeight: 900, lineHeight: 1.04, letterSpacing: "-0.05em", margin: 0 }}>
-                Sign Up
-              </h1>
-              <p style={{ color: "var(--text-secondary)", fontSize: 12, lineHeight: 1.55, marginTop: 8, maxWidth: 360 }}>
-                {helperCopy}
-              </p>
-            </div>
-
-            <form
-        onSubmit={async (event) => {
-          event.preventDefault();
-          setError("");
-          if (!validate()) return;
-
-          try {
-            const response = await registerMutation.mutateAsync({
-              email,
-              password,
-              full_name: fullName.trim(),
-              trading_experience: tradingExperience,
-              preferred_market: preferredMarket,
-              country,
-            });
-            router.replace(response.user.role === "admin" ? "/admin" : "/workspace");
-            router.refresh();
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "Sign up failed");
-          }
-        }}
-        style={{ display: "grid", gap: 9 }}
-      >
-        <label style={{ display: "grid", gap: 8 }}>
-          <span style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 700 }}>Full Name</span>
-          <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" autoComplete="name" style={fieldStyle} />
-          {renderError(errors.fullName)}
-        </label>
-
-        <label style={{ display: "grid", gap: 8 }}>
-          <span style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 700 }}>Email</span>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" type="email" autoComplete="email" style={fieldStyle} />
-          {renderError(errors.email)}
-        </label>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
-          <label style={{ display: "grid", gap: 8, minWidth: 0 }}>
-            <span style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 700 }}>Password</span>
-            <div style={{ position: "relative" }}>
-              <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a password" type={showPassword ? "text" : "password"} autoComplete="new-password" style={{ ...fieldStyle, paddingRight: 52 }} />
-              <button
-                type="button"
-                onClick={() => setShowPassword((current) => !current)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                style={{
-                  position: "absolute",
-                  right: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: 34,
-                  height: 34,
-                  borderRadius: 12,
-                  border: "none",
-                  background: "transparent",
-                  color: "var(--text-muted)",
-                  cursor: "pointer",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {renderError(errors.password)}
-          </label>
-
-          <label style={{ display: "grid", gap: 8, minWidth: 0 }}>
-            <span style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 700 }}>Confirm Password</span>
-            <div style={{ position: "relative" }}>
-              <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" style={{ ...fieldStyle, paddingRight: 52 }} />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((current) => !current)}
-                aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-                style={{
-                  position: "absolute",
-                  right: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: 34,
-                  height: 34,
-                  borderRadius: 12,
-                  border: "none",
-                  background: "transparent",
-                  color: "var(--text-muted)",
-                  cursor: "pointer",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {renderError(errors.confirmPassword)}
-          </label>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
-          <label style={{ display: "grid", gap: 8, minWidth: 0 }}>
-            <span style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 700 }}>Trading Experience</span>
-            <select value={tradingExperience} onChange={(e) => setTradingExperience(e.target.value)} style={fieldStyle}>
-              <option value="">Select experience</option>
-              {TRADING_EXPERIENCE.map((item) => <option key={item} value={item}>{item}</option>)}
-            </select>
-            {renderError(errors.tradingExperience)}
-          </label>
-
-          <label style={{ display: "grid", gap: 8, minWidth: 0 }}>
-            <span style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 700 }}>Preferred Market</span>
-            <select value={preferredMarket} onChange={(e) => setPreferredMarket(e.target.value)} style={fieldStyle}>
-              <option value="">Select market</option>
-              {PREFERRED_MARKETS.map((item) => <option key={item} value={item}>{item}</option>)}
-            </select>
-            {renderError(errors.preferredMarket)}
-          </label>
-        </div>
-
-        <label ref={countryRef} style={{ display: "grid", gap: 8, position: "relative" }}>
-          <span style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 700 }}>Country</span>
-          <div
-            style={{
-	              border: "1px solid color-mix(in srgb, var(--border) 72%, transparent)",
-	              borderRadius: 16,
-	              background: "color-mix(in srgb, var(--bg-card) 96%, white 4%)",
-	              overflow: "hidden",
-	            }}
-	          >
-            <div style={{ position: "relative", borderBottom: "1px solid color-mix(in srgb, var(--border) 72%, transparent)" }}>
-              <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-              <input
-                value={countryQuery}
-                onChange={(e) => setCountryQuery(e.target.value)}
-                onFocus={() => setCountryOpen(true)}
-                placeholder="Search country"
-                style={{ ...fieldStyle, border: "none", borderRadius: 0, paddingLeft: 38, margin: 0, background: "transparent", minHeight: 44 }}
-              />
-            </div>
-              {countryOpen ? (
-                <div
-                  style={{
-                    maxHeight: 132,
-                    overflowY: "auto",
-                    padding: 6,
-                    display: "grid",
-                    gap: 4,
-                  }}
-                >
-                  {filteredCountries.length > 0 ? (
-                    filteredCountries.map((item) => {
-                      const selected = country === item;
-                      return (
-                        <button
-                          key={item}
-                          type="button"
-                          onClick={() => {
-                            setCountry(item);
-                            setCountryQuery(item);
-                            setCountryOpen(false);
-                          }}
-                          style={{
-                            width: "100%",
-                            textAlign: "left",
-                            padding: "8px 10px",
-                            borderRadius: 10,
-                            border: "none",
-                            background: selected
-                              ? "rgba(47,95,226,0.14)"
-                              : "transparent",
-                            color: selected ? "#2f5fe2" : "var(--text-primary)",
-                            fontSize: 13,
-                            fontWeight: selected ? 700 : 500,
-                            cursor: "pointer",
-                            fontFamily: "inherit",
-                          }}
-                        >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                gap: 8,
+              }}
+            >
+              <label style={{ display: "grid", gap: 5, minWidth: 0 }}>
+                <span style={labelStyle}>Trading Experience</span>
+                {renderInputShell(
+                  <BriefcaseBusiness size={18} />,
+                  <>
+                    <select
+                      value={tradingExperience}
+                      onChange={(event) => setTradingExperience(event.target.value)}
+                      style={{
+                        ...inputStyle,
+                        color: tradingExperience ? "#f8fafc" : "rgba(215, 223, 255, 0.72)",
+                        backgroundColor: "transparent",
+                        appearance: "none",
+                        WebkitAppearance: "none",
+                        paddingRight: 50,
+                      }}
+                    >
+                      <option value="" style={{ backgroundColor: "#101935", color: "rgba(215, 223, 255, 0.72)" }}>
+                        Select experience
+                      </option>
+                      {TRADING_EXPERIENCE.map((item) => (
+                        <option key={item} value={item} style={{ backgroundColor: "#101935", color: "#f8fafc" }}>
                           {item}
-                        </button>
-                      );
-                    })
-                  ) : (
-                    <div style={{ padding: "8px 10px", color: "var(--text-muted)", fontSize: 13 }}>
-                      No countries found.
-                    </div>
-                  )}
+                        </option>
+                      ))}
+                    </select>
+                    <span
+                      style={{
+                        position: "absolute",
+                        right: 12,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "rgba(221, 233, 255, 0.9)",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <ChevronDown size={18} />
+                    </span>
+                  </>,
+                )}
+                {renderError(errors.tradingExperience)}
+              </label>
+
+              <label style={{ display: "grid", gap: 5, minWidth: 0 }}>
+                <span style={labelStyle}>Preferred Market</span>
+                {renderInputShell(
+                  <Globe2 size={18} />,
+                  <>
+                    <select
+                      value={preferredMarket}
+                      onChange={(event) => setPreferredMarket(event.target.value)}
+                      style={{
+                        ...inputStyle,
+                        color: preferredMarket ? "#f8fafc" : "rgba(215, 223, 255, 0.72)",
+                        backgroundColor: "transparent",
+                        appearance: "none",
+                        WebkitAppearance: "none",
+                        paddingRight: 50,
+                      }}
+                    >
+                      <option value="" style={{ backgroundColor: "#101935", color: "rgba(215, 223, 255, 0.72)" }}>
+                        Select market
+                      </option>
+                      {PREFERRED_MARKETS.map((item) => (
+                        <option key={item} value={item} style={{ backgroundColor: "#101935", color: "#f8fafc" }}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                    <span
+                      style={{
+                        position: "absolute",
+                        right: 12,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "rgba(221, 233, 255, 0.9)",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <ChevronDown size={18} />
+                    </span>
+                  </>,
+                )}
+                {renderError(errors.preferredMarket)}
+              </label>
+            </div>
+
+            <label ref={countryRef} style={{ display: "grid", gap: 5, position: "relative" }}>
+              <span style={labelStyle}>Country</span>
+              <div
+                style={{
+                  position: "relative",
+                  borderRadius: 16,
+                  border: "1px solid rgba(130, 154, 255, 0.32)",
+                  background:
+                    "linear-gradient(180deg, rgba(22, 30, 74, 0.68), rgba(15, 22, 58, 0.74))",
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 28px rgba(10, 18, 48, 0.26)",
+                  overflow: "visible",
+                }}
+              >
+                <div style={{ position: "relative" }}>
+                  <span style={iconWrapStyle}>
+                    <Search size={18} />
+                  </span>
+                  <input
+                    value={countryQuery}
+                    onChange={(event) => setCountryQuery(event.target.value)}
+                    onFocus={() => setCountryOpen(true)}
+                    placeholder="Search country"
+                    style={{
+                      ...inputStyle,
+                    minHeight: 42,
+                    }}
+                  />
                 </div>
-              ) : null}
-          </div>
-	          {country ? <div style={{ color: "var(--text-secondary)", fontSize: 12 }}>Selected: {country}</div> : null}
-	          {renderError(errors.country)}
-	        </label>
 
-        {error ? (
-          <div
-            role="alert"
-            style={{
-              borderRadius: 14,
-              border: "1px solid rgba(255,77,106,0.28)",
-              background: "rgba(255,77,106,0.10)",
-              color: "#ff8ca0",
-              fontSize: 13,
-              lineHeight: 1.6,
-              padding: "12px 14px",
-            }}
-          >
-            {error}
-          </div>
-        ) : null}
-
-          <button type="submit" disabled={registerMutation.isPending} style={{ ...buttonStyle, opacity: registerMutation.isPending ? 0.72 : 1 }}>
-            {registerMutation.isPending ? "Signing up..." : "Sign Up"}
-          </button>
-
-              <div style={{ marginTop: 12, textAlign: "center", fontSize: 12, color: "var(--text-secondary)" }}>
-                Already have an account?{" "}
-                <Link href="/login" style={{ color: "#2f5fe2", textDecoration: "none", fontWeight: 700 }}>
-                  Login
-                </Link>
+                {countryOpen ? (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      left: 0,
+                      right: 0,
+                      zIndex: 20,
+                      maxHeight: 160,
+                      overflowY: "auto",
+                      padding: 8,
+                      display: "grid",
+                      gap: 4,
+                      borderRadius: 16,
+                      border: "1px solid rgba(130, 154, 255, 0.24)",
+                      background:
+                        "linear-gradient(180deg, rgba(10, 17, 44, 0.98), rgba(8, 14, 36, 0.98))",
+                      boxShadow: "0 24px 44px rgba(2, 8, 28, 0.48)",
+                    }}
+                  >
+                    {filteredCountries.length > 0 ? (
+                      filteredCountries.map((item) => {
+                        const selected = country === item;
+                        return (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => {
+                              setCountry(item);
+                              setCountryQuery(item);
+                              setCountryOpen(false);
+                            }}
+                            style={{
+                              width: "100%",
+                              textAlign: "left",
+                              padding: "9px 10px",
+                              borderRadius: 10,
+                              border: "none",
+                              background: selected ? "rgba(48, 118, 255, 0.18)" : "transparent",
+                              color: selected ? "#68d7ff" : "#f8fafc",
+                              fontSize: 13,
+                              fontWeight: selected ? 700 : 500,
+                              cursor: "pointer",
+                              fontFamily: "inherit",
+                            }}
+                          >
+                            {item}
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div style={{ padding: "8px 10px", color: "rgba(215, 223, 255, 0.68)", fontSize: 13 }}>
+                        No countries found.
+                      </div>
+                    )}
+                  </div>
+                ) : null}
               </div>
-            </form>
-          </div>
+              {renderError(errors.country)}
+            </label>
+
+            {error ? (
+              <div
+                role="alert"
+                style={{
+                  borderRadius: 16,
+                  border: "1px solid rgba(255, 103, 142, 0.32)",
+                  background: "rgba(88, 18, 42, 0.32)",
+                  color: "#ffb2c5",
+                  fontSize: 11,
+                  lineHeight: 1.6,
+                  padding: "8px 10px",
+                }}
+              >
+                {error}
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={registerMutation.isPending}
+              style={{
+                ...actionButtonStyle,
+                opacity: registerMutation.isPending ? 0.72 : 1,
+                marginTop: 2,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+              }}
+            >
+              <span>{registerMutation.isPending ? "Signing up..." : "Sign Up"}</span>
+              <ArrowRight size={18} />
+            </button>
+
+            <div
+              style={{
+                marginTop: 4,
+                textAlign: "center",
+                color: "rgba(220, 227, 255, 0.72)",
+                fontSize: 12,
+              }}
+            >
+              Already have an account?{" "}
+              <Link href="/login" style={{ color: "#37c7ff", textDecoration: "none", fontWeight: 800 }}>
+                Login
+              </Link>
+            </div>
+          </form>
         </div>
       </div>
     </div>
